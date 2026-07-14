@@ -16,9 +16,8 @@ interface Question {
   options: Option[];
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. QUESTION DATA ARRAY
-  const QUESTIONS: Question[] = [
+// 1. QUESTION DATA ARRAY
+const QUESTIONS: Question[] = [
     {
       section: 'GETTING FOUND',
       icon: 'search',
@@ -163,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   ];
 
+document.addEventListener('DOMContentLoaded', () => {
   const GHL_WEBHOOK_URL = (import.meta as any).env?.VITE_GHL_WEBHOOK_URL || "https://services.leadconnectorhq.com/hooks/placeholder_webhook_url";
 
   // 2. STATE VARIABLES
@@ -268,189 +268,211 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6. QUESTION RENDERER
   function renderQuestion(index: number) {
-    const q = QUESTIONS[index];
-    const progressPct = Math.round((index / 12) * 100);
-    
-    const optionsHTML = q.options.map((opt, i) => {
-      const isSelected = selectedIndices[index] === i;
-      const cardClass = isSelected 
-        ? 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option' 
-        : 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option';
-      
-      const circleClass = isSelected 
-        ? 'w-5 h-5 rounded-full bg-[#1A9080] flex items-center justify-center shrink-0 text-white radio-circle' 
-        : 'w-5 h-5 rounded-full border-1.5 border-[#1C1C1A]/30 dark:border-white/30 flex items-center justify-center shrink-0 transition-all duration-150 radio-circle';
-      
-      const checkHTML = isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white"></i>' : '';
-
-      return `
-        <div class="${cardClass}" data-points="${opt.pts}" data-index="${i}">
-          <div class="${circleClass}">${checkHTML}</div>
-          <span class="font-sans font-medium text-[15px] sm:text-[16px] text-[#1C1C1A] dark:text-[#F5F2EC]">${opt.text}</span>
-        </div>
-      `;
-    }).join('');
-    
-    const stateQuestion = document.getElementById('state-question');
-    if (stateQuestion) {
-      stateQuestion.innerHTML = `
-        <!-- Top Progress Bar -->
-        <div class="w-full mb-12 flex flex-col">
-          <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
-            <div class="flex items-center gap-2.5 text-[#1A9080] dark:text-[#22D3EE]">
-              <i data-lucide="${q.icon}" class="w-5 h-5"></i>
-              <span id="section-label" class="font-sans font-bold text-[13px] tracking-[1.5px] uppercase">${q.section}</span>
-            </div>
-            <span class="font-sans text-[14px] text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 font-medium" id="question-counter">
-              Question <span class="font-bold text-[#1C1C1A] dark:text-[#F5F2EC]">${index + 1}</span> of 12
-            </span>
-          </div>
-          <div class="w-full h-[6px] bg-[#E8E5DF] dark:bg-[#2E2E2C] rounded-full overflow-hidden">
-            <div id="progress-bar-fill" class="h-full bg-[#1A9080] rounded-full transition-all duration-300" style="width: ${progressPct}%;"></div>
-          </div>
-        </div>
-
-        <!-- 2-Column Responsive Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start w-full">
-          <!-- Column 1 (Left 65%) -->
-          <div class="md:col-span-8 flex flex-col relative min-h-[440px]">
-            <div id="quiz-question-card" class="bg-white dark:bg-[#1C1C1A] border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 md:p-11 shadow-md relative flex flex-col justify-between min-h-[440px]">
-              <div>
-                <div class="flex items-center gap-2 text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 mb-4">
-                  <i data-lucide="${q.icon}" class="w-4 h-4"></i>
-                  <span class="font-sans font-semibold text-[11px] tracking-[1px] uppercase">${q.section}</span>
-                </div>
-                
-                <h2 class="font-display font-bold text-[22px] md:text-[26px] text-[#1C1C1A] dark:text-[#F5F2EC] leading-tight mb-8 question-text">
-                  ${q.question}
-                </h2>
-
-                <div id="answers-container" class="flex flex-col gap-3.5">
-                  ${optionsHTML}
-                </div>
-              </div>
-
-              <!-- Actions Footer inside card -->
-              <div class="flex items-center justify-between border-t border-[#E8E5DF] dark:border-[#2E2E2C] pt-6 mt-8">
-                <!-- Back Button -->
-                ${index > 0 
-                  ? `<button id="back-btn" class="flex items-center gap-2 text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 hover:text-[#E8622A] font-sans font-semibold text-[15px] transition-colors cursor-pointer">
-                       &larr; Back
-                     </button>` 
-                  : `<div></div>`
-                }
-                
-                <button id="next-btn" class="bg-[#1C1C1A] dark:bg-[#F5F2EC] hover:bg-[#E8622A] dark:hover:bg-[#E8622A] hover:text-white dark:hover:text-white text-[#F5F2EC] dark:text-[#1C1C1A] font-sans font-bold text-[15px] sm:text-[16px] px-8 py-3.5 rounded-full transition-all duration-200 shadow-xs items-center gap-2 cursor-pointer" style="display: ${selectedPoints[index] !== null ? 'flex' : 'none'};">
-                  <span>Next Question</span>
-                  &rarr;
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <!-- Column 2 (Right 35% - Desktop Sticky Gauge) -->
-          <div class="hidden md:block md:col-span-4 sticky top-[110px]">
-            ${buildLeakMeterHTML()}
-          </div>
-        </div>
-
-        <!-- Sticky Mini Leak Meter for Mobile Only -->
-        <div class="md:hidden bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl px-5 py-4 sticky top-[72px] z-30 shadow-xs mt-6">
-          <div class="flex justify-between items-center mb-2.5">
-            <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-[11px] font-sans font-bold uppercase tracking-[1px]">Est. Monthly Leak:</span>
-            <span id="mobile-leak-dollar" class="text-[#E8622A] font-display font-bold text-[22px] leading-none">$0</span>
-          </div>
-          <div class="relative w-full h-2 bg-[#E8E5DF] dark:bg-[#2E2E2C] rounded-full overflow-visible">
-            <div class="absolute inset-0 rounded-full bg-gradient-to-r from-[#1A9080] via-[#C9A96E] to-[#E8622A]"></div>
-            <div id="mobile-needle-indicator" class="absolute top-1/2 -translate-y-1/2 w-[16px] h-[16px] bg-white border-[3px] border-[#1C1C1A] rounded-full shadow-md transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1)" style="left: 0%;"></div>
-          </div>
-        </div>
-      `;
+    if (!QUESTIONS || !QUESTIONS.length) {
+      document.getElementById('state-question').innerHTML = 
+        '<p style="color:red;padding:40px">ERROR: QUESTIONS array is empty or undefined</p>';
+      return;
     }
-    
-    // Set active needle smoothly
-    const cumulativeScore = selectedPoints.slice(0, index + 1).filter(p => p !== null).reduce((a, b) => a + b, 0);
-    updateLeakMeter(cumulativeScore);
 
-    if (typeof (window as any).lucide !== 'undefined') {
-      (window as any).lucide.createIcons();
-    }
-    
-    // Attach selection handlers via event delegation
-    const container = document.getElementById('answers-container');
-    if (container) {
-      container.addEventListener('click', function(e) {
-        const option = (e.target as HTMLElement).closest('.answer-option');
-        if (!option) return;
+    try {
+      const q = QUESTIONS[index];
+      const progressPct = Math.round((index / 12) * 100);
+      
+      const optionsHTML = q.options.map((opt, i) => {
+        const isSelected = selectedIndices[index] === i;
+        const cardClass = isSelected 
+          ? 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option' 
+          : 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option';
         
-        container.querySelectorAll('.answer-option').forEach(el => {
-          el.className = 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option';
-          const circle = el.querySelector('.radio-circle');
-          if (circle) {
-            circle.className = 'w-5 h-5 rounded-full border-1.5 border-[#1C1C1A]/30 dark:border-white/30 flex items-center justify-center shrink-0 transition-all duration-150 radio-circle';
-            circle.innerHTML = '';
+        const circleClass = isSelected 
+          ? 'w-5 h-5 rounded-full bg-[#1A9080] flex items-center justify-center shrink-0 text-white radio-circle' 
+          : 'w-5 h-5 rounded-full border-1.5 border-[#1C1C1A]/30 dark:border-white/30 flex items-center justify-center shrink-0 transition-all duration-150 radio-circle';
+        
+        const checkHTML = isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white"></i>' : '';
+
+        return `
+          <div class="${cardClass}" data-points="${opt.pts}" data-index="${i}">
+            <div class="${circleClass}">${checkHTML}</div>
+            <span class="font-sans font-medium text-[15px] sm:text-[16px] text-[#1C1C1A] dark:text-[#F5F2EC]">${opt.text}</span>
+          </div>
+        `;
+      }).join('');
+      
+      const stateQuestion = document.getElementById('state-question');
+      if (stateQuestion) {
+        stateQuestion.innerHTML = `
+          <!-- Top Progress Bar -->
+          <div class="w-full mb-12 flex flex-col">
+            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-4">
+              <div class="flex items-center gap-2.5 text-[#1A9080] dark:text-[#22D3EE]">
+                <i data-lucide="${q.icon}" class="w-5 h-5"></i>
+                <span id="section-label" class="font-sans font-bold text-[13px] tracking-[1.5px] uppercase">${q.section}</span>
+              </div>
+              <span class="font-sans text-[14px] text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 font-medium" id="question-counter">
+                Question <span class="font-bold text-[#1C1C1A] dark:text-[#F5F2EC]">${index + 1}</span> of 12
+              </span>
+            </div>
+            <div class="w-full h-[6px] bg-[#E8E5DF] dark:bg-[#2E2E2C] rounded-full overflow-hidden">
+              <div id="progress-bar-fill" class="h-full bg-[#1A9080] rounded-full transition-all duration-300" style="width: ${progressPct}%;"></div>
+            </div>
+          </div>
+  
+          <!-- 2-Column Responsive Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start w-full">
+            <!-- Column 1 (Left 65%) -->
+            <div class="md:col-span-8 flex flex-col relative min-h-[440px]">
+              <div id="quiz-question-card" class="bg-white dark:bg-[#1C1C1A] border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 md:p-11 shadow-md relative flex flex-col justify-between min-h-[440px]">
+                <div>
+                  <div class="flex items-center gap-2 text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 mb-4">
+                    <i data-lucide="${q.icon}" class="w-4 h-4"></i>
+                    <span class="font-sans font-semibold text-[11px] tracking-[1px] uppercase">${q.section}</span>
+                  </div>
+                  
+                  <h2 class="font-display font-bold text-[22px] md:text-[26px] text-[#1C1C1A] dark:text-[#F5F2EC] leading-tight mb-8 question-text">
+                    ${q.question}
+                  </h2>
+  
+                  <div id="answers-container" class="flex flex-col gap-3.5">
+                    ${optionsHTML}
+                  </div>
+                </div>
+  
+                <!-- Actions Footer inside card -->
+                <div class="flex items-center justify-between border-t border-[#E8E5DF] dark:border-[#2E2E2C] pt-6 mt-8">
+                  <!-- Back Button -->
+                  ${index > 0 
+                    ? `<button id="back-btn" class="flex items-center gap-2 text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 hover:text-[#E8622A] font-sans font-semibold text-[15px] transition-colors cursor-pointer">
+                         &larr; Back
+                       </button>` 
+                    : `<div></div>`
+                  }
+                  
+                  <button id="next-btn" class="bg-[#1C1C1A] dark:bg-[#F5F2EC] hover:bg-[#E8622A] dark:hover:bg-[#E8622A] hover:text-white dark:hover:text-white text-[#F5F2EC] dark:text-[#1C1C1A] font-sans font-bold text-[15px] sm:text-[16px] px-8 py-3.5 rounded-full transition-all duration-200 shadow-xs items-center gap-2 cursor-pointer" style="display: ${selectedPoints[index] !== null ? 'flex' : 'none'};">
+                    <span>Next Question</span>
+                    &rarr;
+                  </button>
+                </div>
+              </div>
+            </div>
+  
+            <!-- Column 2 (Right 35% - Desktop Sticky Gauge) -->
+            <div class="hidden md:block md:col-span-4 sticky top-[110px]">
+              ${buildLeakMeterHTML()}
+            </div>
+          </div>
+  
+          <!-- Sticky Mini Leak Meter for Mobile Only -->
+          <div class="md:hidden bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl px-5 py-4 sticky top-[72px] z-30 shadow-xs mt-6">
+            <div class="flex justify-between items-center mb-2.5">
+              <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-[11px] font-sans font-bold uppercase tracking-[1px]">Est. Monthly Leak:</span>
+              <span id="mobile-leak-dollar" class="text-[#E8622A] font-display font-bold text-[22px] leading-none">$0</span>
+            </div>
+            <div class="relative w-full h-2 bg-[#E8E5DF] dark:bg-[#2E2E2C] rounded-full overflow-visible">
+              <div class="absolute inset-0 rounded-full bg-gradient-to-r from-[#1A9080] via-[#C9A96E] to-[#E8622A]"></div>
+              <div id="mobile-needle-indicator" class="absolute top-1/2 -translate-y-1/2 w-[16px] h-[16px] bg-white border-[3px] border-[#1C1C1A] rounded-full shadow-md transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1)" style="left: 0%;"></div>
+            </div>
+          </div>
+        `;
+      }
+      
+      // Set active needle smoothly
+      const cumulativeScore = selectedPoints.slice(0, index + 1).filter(p => p !== null).reduce((a, b) => a + b, 0);
+      updateLeakMeter(cumulativeScore);
+  
+      if (typeof (window as any).lucide !== 'undefined') {
+        (window as any).lucide.createIcons();
+      }
+      
+      // Attach selection handlers via event delegation
+      const container = document.getElementById('answers-container');
+      if (container) {
+        container.addEventListener('click', function(e) {
+          const option = (e.target as HTMLElement).closest('.answer-option');
+          if (!option) return;
+          
+          container.querySelectorAll('.answer-option').forEach(el => {
+            el.className = 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option';
+            const circle = el.querySelector('.radio-circle');
+            if (circle) {
+              circle.className = 'w-5 h-5 rounded-full border-1.5 border-[#1C1C1A]/30 dark:border-white/30 flex items-center justify-center shrink-0 transition-all duration-150 radio-circle';
+              circle.innerHTML = '';
+            }
+          });
+          
+          option.className = 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option';
+          const activeCircle = option.querySelector('.radio-circle');
+          if (activeCircle) {
+            activeCircle.className = 'w-5 h-5 rounded-full bg-[#1A9080] flex items-center justify-center shrink-0 text-white radio-circle';
+            activeCircle.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-white"></i>';
           }
+          
+          const pts = parseInt(option.getAttribute('data-points') || '0', 10);
+          const optIndex = parseInt(option.getAttribute('data-index') || '0', 10);
+          selectedPoints[currentQ] = pts;
+          selectedIndices[currentQ] = optIndex;
+          
+          saveSessionState();
+  
+          if (typeof (window as any).lucide !== 'undefined') {
+            (window as any).lucide.createIcons();
+          }
+  
+          totalScore = selectedPoints.filter(p => p !== null).reduce((a, b: any) => a + b, 0);
+          updateLeakMeter(totalScore);
+          
+          const nextBtn = document.getElementById('next-btn');
+          if (nextBtn) nextBtn.style.display = 'flex';
         });
-        
-        option.className = 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option';
-        const activeCircle = option.querySelector('.radio-circle');
-        if (activeCircle) {
-          activeCircle.className = 'w-5 h-5 rounded-full bg-[#1A9080] flex items-center justify-center shrink-0 text-white radio-circle';
-          activeCircle.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-white"></i>';
-        }
-        
-        const pts = parseInt(option.getAttribute('data-points') || '0', 10);
-        const optIndex = parseInt(option.getAttribute('data-index') || '0', 10);
-        selectedPoints[currentQ] = pts;
-        selectedIndices[currentQ] = optIndex;
-        
-        saveSessionState();
-
-        if (typeof (window as any).lucide !== 'undefined') {
-          (window as any).lucide.createIcons();
-        }
-
-        totalScore = selectedPoints.filter(p => p !== null).reduce((a, b: any) => a + b, 0);
-        updateLeakMeter(totalScore);
-        
-        const nextBtn = document.getElementById('next-btn');
-        if (nextBtn) nextBtn.style.display = 'flex';
-      });
-    }
-    
-    // Attach Next button listener
-    const nextBtn = document.getElementById('next-btn');
-    if (nextBtn) {
-      nextBtn.addEventListener('click', function() {
-        const isLastQ = currentQ === 11;
-        const isSectionEnd = [3, 6, 9].includes(currentQ);
-        
-        if (isLastQ) {
-          showState('emailgate');
-          attachEmailGateListeners();
-        } else if (isSectionEnd) {
-          showSectionTransition(currentQ + 1, function() {
+      }
+      
+      // Attach Next button listener
+      const nextBtn = document.getElementById('next-btn');
+      if (nextBtn) {
+        nextBtn.addEventListener('click', function() {
+          const isLastQ = currentQ === 11;
+          const isSectionEnd = [3, 6, 9].includes(currentQ);
+          
+          if (isLastQ) {
+            showState('emailgate');
+            attachEmailGateListeners();
+          } else if (isSectionEnd) {
+            showSectionTransition(currentQ + 1, function() {
+              currentQ++;
+              renderQuestion(currentQ);
+              showState('question');
+            });
+          } else {
             currentQ++;
             renderQuestion(currentQ);
             showState('question');
-          });
-        } else {
-          currentQ++;
-          renderQuestion(currentQ);
-          showState('question');
+          }
+        });
+      }
+  
+      // Attach Back button listener
+      const backBtn = document.getElementById('back-btn');
+      if (backBtn) {
+        backBtn.addEventListener('click', function() {
+          if (currentQ > 0) {
+            currentQ--;
+            renderQuestion(currentQ);
+          }
+        });
+      }
+    } catch (err: any) {
+      console.error(err);
+      const stateQuestion = document.getElementById('state-question');
+      if (stateQuestion) {
+        stateQuestion.innerHTML = `
+          <div style="color:white;padding:40px;text-align:center;">
+            <p>Quiz error: <span id="quiz-error-msg"></span></p>
+          </div>
+        `;
+        const errMsgEl = document.getElementById('quiz-error-msg');
+        if (errMsgEl) {
+          errMsgEl.textContent = err.message;
         }
-      });
-    }
-
-    // Attach Back button listener
-    const backBtn = document.getElementById('back-btn');
-    if (backBtn) {
-      backBtn.addEventListener('click', function() {
-        if (currentQ > 0) {
-          currentQ--;
-          renderQuestion(currentQ);
-        }
-      });
+      }
     }
   }
 
@@ -831,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
     startBtn.addEventListener('click', function() {
+      console.log('QUESTIONS:', QUESTIONS);
       clearAuditState();
       showState('question');
       renderQuestion(0);
