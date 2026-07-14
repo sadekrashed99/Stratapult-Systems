@@ -177,6 +177,7 @@ document.addEventListener('DOMContentLoaded', () => {
     ['intro', 'question', 'emailgate', 'email-gate', 'results'].forEach(id => {
       const el = document.getElementById(`state-${id}`);
       if (el) {
+        el.classList.add('state-hidden');
         el.style.display = 'none';
         el.classList.remove('active');
       }
@@ -184,6 +185,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const target = document.getElementById(`state-${stateName}`);
     if (target) {
+      target.classList.remove('state-hidden');
       target.style.display = 'block';
       target.style.visibility = 'visible';
       target.style.opacity = '1';
@@ -268,6 +270,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 6. QUESTION RENDERER
   function renderQuestion(index: number) {
+    console.log('renderQuestion → target el:', document.getElementById('state-question'), '| q:', QUESTIONS[index]);
+
     if (!QUESTIONS || !QUESTIONS.length) {
       document.getElementById('state-question').innerHTML = 
         '<p style="color:red;padding:40px">ERROR: QUESTIONS array is empty or undefined</p>';
