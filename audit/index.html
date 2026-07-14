@@ -39,12 +39,28 @@
         border-color: #1A9080 !important;
         background-color: rgba(26, 144, 128, 0.05) !important;
       }
+
+      /* Option cards hover effects */
+      .option-card {
+        transition: all 0.15s ease;
+      }
+      .option-card:hover:not(.selected) {
+        background: #FAF7F2;
+        border-color: #C9A96E;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
+        cursor: pointer;
+      }
+      .dark .option-card:hover:not(.selected) {
+        background: #1F1F1C;
+        border-color: #C9A96E;
+      }
     </style>
   </head>
   <body class="bg-[#F5F2EC] dark:bg-[#141412] text-[#1C1C1A] dark:text-[#F5F2EC] font-sans transition-colors-theme select-none min-h-screen flex flex-col overflow-x-hidden">
     
     <!-- 1. STICKY HEADER NAVBAR -->
-    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 h-[72px] bg-[#F5F2EC]/92 dark:bg-[#141412]/92 backdrop-blur-md border-b border-[#1C1C1A]/10 dark:border-[#2E2E2C] transition-colors-theme">
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 h-[72px] transition-all duration-300 bg-transparent border-b border-transparent">
       <div class="max-w-[1280px] h-full mx-auto px-6 flex items-center justify-between">
         
         <!-- Logo / Wordmark Left -->
@@ -54,24 +70,37 @@
 
         <!-- Desktop Navigation Center (pointing back to homepage sections) -->
         <div class="hidden md:flex items-center gap-[40px] h-full">
-          <a href="/" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
-            Home
-          </a>
-          <a href="/#our-os" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
-            Systems
-          </a>
-          <a href="/#results" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
+          <div class="relative h-full flex items-center" id="nav-item-systems">
+            <button class="font-sans font-semibold text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors duration-200 inline-flex items-center gap-1 cursor-pointer">
+              Systems <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-[#1A9080]"></i>
+            </button>
+            <div class="absolute bottom-0 left-0 w-full h-[2px] bg-[#1A9080] scale-x-0 transition-transform duration-200 origin-left" id="underline-systems"></div>
+          </div>
+
+          <a href="/#results" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200 relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#1A9080] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left">
             Results
           </a>
-          <a href="/#pricing" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
-            Resources
+
+          <div class="relative h-full flex items-center" id="nav-item-resources">
+            <button class="font-sans font-semibold text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors duration-200 inline-flex items-center gap-1 cursor-pointer">
+              Resources <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-[#1A9080]"></i>
+            </button>
+            <div class="absolute bottom-0 left-0 w-full h-[2px] bg-[#1A9080] scale-x-0 transition-transform duration-200 origin-left" id="underline-resources"></div>
+          </div>
+
+          <a href="/#how-it-works" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200 relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#1A9080] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left">
+            How It Works
+          </a>
+
+          <a href="/#pricing" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200 relative py-1 after:absolute after:bottom-0 after:left-0 after:w-full after:h-[2px] after:bg-[#1A9080] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-200 after:origin-left">
+            Pricing
           </a>
         </div>
 
         <!-- Desktop Action Controls Right -->
         <div class="hidden md:flex items-center gap-6">
           <!-- CTA Button -->
-          <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="bg-[#E8622A] hover:bg-[#ff763d] text-[#F5F2EC] font-sans font-bold text-[14px] px-6 py-[12px] rounded-full transition-all duration-300 shadow-md shadow-[#E8622A]/10 hover:scale-[1.04] inline-flex items-center gap-1">
+          <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="bg-[#E8622A] hover:bg-[#ff763d] text-[#F5F2EC] font-sans font-bold text-[14px] px-6 py-[12px] rounded-full transition-all duration-300 shadow-md shadow-[#E8622A]/10 hover:scale-[1.04] hover:shadow-[0_8px_24px_rgba(232,98,42,0.35)] inline-flex items-center gap-1 cursor-pointer">
             Get FluxOS &rarr;
           </a>
         </div>
@@ -79,41 +108,730 @@
         <!-- Mobile Action Controls Right -->
         <div class="flex items-center gap-3 md:hidden">
           <button id="mobile-menu-trigger" class="p-2 text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors" aria-label="Open navigation menu">
-            <i data-lucide="menu" class="w-[22px] h-[22px]" id="mobile-hamburger-icon"></i>
+            <i data-lucide="menu" class="w-[22px] h-[22px]"></i>
           </button>
         </div>
 
       </div>
+
+      <!-- ========================================================= -->
+      <!-- DESKTOP MEGA MENU PANEL (SYSTEMS) -->
+      <!-- ========================================================= -->
+      <div
+        id="mega-menu-systems"
+        style="pointer-events: none;"
+        class="hidden md:block absolute left-0 w-full top-[72px] bg-[#F5F2EC] dark:bg-[#141412] border-t-2 border-[#1A9080] border-b border-[#1C1C1A]/10 dark:border-[#2E2E2C] shadow-[0_24px_48px_rgba(28,28,26,0.12)] z-40 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] opacity-0 -translate-y-2"
+      >
+        <div class="max-w-[1280px] mx-auto px-6 py-10 grid grid-cols-12 gap-8 text-left">
+          <!-- COLUMN 1 [45%] — OS SYSTEMS LIST -->
+          <div class="col-span-5 border-r border-[#1C1C1A]/10 dark:border-[#2E2E2C] pr-6">
+            <span class="font-sans font-bold text-[11px] text-[#1C1C1A]/45 dark:text-[#F5F2EC]/45 uppercase tracking-[0.15em] block mb-4">
+              OUR SYSTEMS
+            </span>
+
+            <div class="grid grid-cols-2 gap-x-4 gap-y-1">
+              <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="zap" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      FluxOS
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Emergency Electricians
+                  </p>
+                </div>
+              </a>
+
+              <a href="#" class="coming-soon-btn group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left" data-name="AquaOS">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="droplets" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      AquaOS
+                    </span>
+                    <span class="opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 bg-[#C9A96E]/25 text-[#C9A96E] text-[9px] font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Soon
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Plumbers &amp; Water Specialists
+                  </p>
+                </div>
+              </a>
+
+              <a href="#" class="coming-soon-btn group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left" data-name="BuildOS">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="hard-hat" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      BuildOS
+                    </span>
+                    <span class="opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 bg-[#C9A96E]/25 text-[#C9A96E] text-[9px] font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Soon
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Builders &amp; Renovators
+                  </p>
+                </div>
+              </a>
+
+              <a href="#" class="coming-soon-btn group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left" data-name="ThermoOS">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="flame" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      ThermoOS
+                    </span>
+                    <span class="opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 bg-[#C9A96E]/25 text-[#C9A96E] text-[9px] font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Soon
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Heating, Cooling &amp; HVAC
+                  </p>
+                </div>
+              </a>
+
+              <a href="#" class="coming-soon-btn group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left" data-name="RoofOS">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="home" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      RoofOS
+                    </span>
+                    <span class="opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 bg-[#C9A96E]/25 text-[#C9A96E] text-[9px] font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Soon
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Roofers &amp; Cladding
+                  </p>
+                </div>
+              </a>
+
+              <a href="#" class="coming-soon-btn group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left" data-name="CoatOS">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="brush" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      CoatOS
+                    </span>
+                    <span class="opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 bg-[#C9A96E]/25 text-[#C9A96E] text-[9px] font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Soon
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Painters &amp; Decorators
+                  </p>
+                </div>
+              </a>
+
+              <a href="#" class="coming-soon-btn group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left" data-name="GroundOS">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="leaf" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      GroundOS
+                    </span>
+                    <span class="opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 bg-[#C9A96E]/25 text-[#C9A96E] text-[9px] font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Soon
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Landscapers &amp; Gardeners
+                  </p>
+                </div>
+              </a>
+
+              <a href="#" class="coming-soon-btn group flex items-center gap-3 p-2.5 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#1A9080]/5 dark:hover:bg-[#1A9080]/10 hover:translate-x-1 transition-all duration-200 text-left" data-name="TileOS">
+                <div class="w-8 h-8 rounded-md bg-[#1A9080]/10 flex items-center justify-center text-[#1A9080] shrink-0">
+                  <i data-lucide="grid" class="w-4 h-4"></i>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                      TileOS
+                    </span>
+                    <span class="opacity-0 group-hover:opacity-100 scale-95 group-hover:scale-100 transition-all duration-200 bg-[#C9A96E]/25 text-[#C9A96E] text-[9px] font-sans font-bold px-1.5 py-0.5 rounded uppercase tracking-wider">
+                      Soon
+                    </span>
+                  </div>
+                  <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
+                    Tilers &amp; Floor Layers
+                  </p>
+                </div>
+              </a>
+            </div>
+          </div>
+
+          <!-- COLUMN 2 [30%] — FEATURED OS CARD (FluxOS) -->
+          <div class="col-span-3">
+            <span class="font-sans font-bold text-[11px] text-[#1C1C1A]/45 dark:text-[#F5F2EC]/45 uppercase tracking-[0.15em] block mb-4">
+              FEATURED SYSTEM
+            </span>
+
+            <div class="border border-[#C9A96E]/30 rounded-xl overflow-hidden bg-white dark:bg-[#1C1C1A] shadow-sm flex flex-col h-full">
+              <!-- Image -->
+              <div class="h-[120px] relative overflow-hidden bg-[#0D1B2A]">
+                <img
+                  src="https://storage.googleapis.com/crm-conversations-ai-production/ask-ai-images/1783932100460/9fa4bcce-6f7c-4435-8731-b105822d2842.png"
+                  class="w-full h-full object-cover object-top"
+                  loading="eager"
+                  alt="FluxOS Thumbnail"
+                  referrerpolicy="no-referrer"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent pointer-events-none"></div>
+                <div class="absolute bottom-3 left-4 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-[#1A9080] animate-pulse"></span>
+                  <span class="font-sans font-bold text-[10px] text-[#1A9080] tracking-widest uppercase">
+                    LIVE
+                  </span>
+                </div>
+              </div>
+
+              <!-- Content -->
+              <div class="p-4 flex flex-col justify-between flex-1">
+                <div>
+                  <h4 class="font-serif font-bold text-[18px] text-[#1C1C1A] dark:text-[#F5F2EC] leading-tight">
+                    FluxOS
+                  </h4>
+                  <p class="font-sans text-[12px] text-[#1C1C1A]/65 dark:text-[#F5F2EC]/65 mt-1 leading-snug">
+                    Emergency Electricians &mdash; Melbourne
+                  </p>
+                  <div class="mt-2.5 font-sans font-bold text-[12px] text-[#1A9080]">
+                    43 qualified leads in 30 days
+                  </div>
+                </div>
+
+                <a
+                  href="https://flux-os-cyan.vercel.app"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="group flex items-center gap-1 mt-4 font-sans font-bold text-[12px] text-[#E8622A] hover:text-[#ff763d] transition-colors"
+                >
+                  View live system <span class="group-hover:translate-x-1 transition-transform duration-200">&rarr;</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMN 3 [18%] — RESULTS CALLOUT -->
+          <div class="col-span-2 border-l border-[#C9A96E]/30 pl-6 flex flex-col justify-between h-full">
+            <div>
+              <span class="font-sans font-bold text-[11px] text-[#1C1C1A]/45 dark:text-[#F5F2EC]/45 uppercase tracking-[0.15em] block mb-2">
+                LATEST RESULT
+              </span>
+              <div class="font-serif font-bold text-[40px] text-[#1A9080] leading-none my-1">
+                $127K
+              </div>
+              <p class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 leading-normal max-w-[140px]">
+                in qualified trade leads generated in 2025
+              </p>
+            </div>
+
+            <div class="w-10 h-[1px] bg-[#C9A96E]/40 my-3"></div>
+
+            <div>
+              <div class="font-sans font-extrabold text-[16px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                4.9★
+              </div>
+              <div class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55">
+                avg. client rating
+              </div>
+            </div>
+          </div>
+
+          <!-- COLUMN 4 [12%] — CTA PANEL -->
+          <div class="col-span-2 bg-[#1C1C1A] text-[#F5F2EC] rounded-xl p-5 flex flex-col justify-between h-full shadow-sm text-center">
+            <div>
+              <span class="font-sans text-[12px] text-[#F5F2EC]/65 block mb-1">
+                Ready to build?
+              </span>
+              <h4 class="font-serif font-bold text-[22px] text-white leading-tight">
+                Let's Talk
+              </h4>
+            </div>
+
+            <a
+              href="/#book"
+              class="mt-4 w-full bg-[#E8622A] hover:bg-[#ff763d] text-white font-sans font-bold text-[12px] py-3 px-2 rounded-full transition-all duration-300 hover:scale-[1.03] shadow-md shadow-[#E8622A]/10 text-center"
+            >
+              Book Call
+            </a>
+
+            <a
+              href="/#results"
+              class="font-sans font-bold text-[11px] text-[#1A9080] hover:text-[#E8622A] block text-center mt-3 transition-colors"
+            >
+              See all results &rarr;
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================= -->
+      <!-- DESKTOP RESOURCES MEGA MENU PANEL -->
+      <!-- ========================================================= -->
+      <div
+        id="mega-menu-resources"
+        style="pointer-events: none;"
+        class="hidden md:block absolute left-0 w-full top-[72px] bg-[#F5F2EC] dark:bg-[#141412] border-t-2 border-[#1A9080] border-b border-[#1C1C1A]/10 dark:border-[#2E2E2C] shadow-[0_24px_48px_rgba(28,28,26,0.12)] z-40 transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] opacity-0 -translate-y-2"
+      >
+        <div class="max-w-[1280px] mx-auto px-6 py-10 grid grid-cols-12 gap-8 text-left">
+          <!-- COLUMN 1 [25%] — CALCULATORS -->
+          <div class="col-span-3 border-r border-[#1C1C1A]/10 dark:border-[#2E2E2C] pr-6 flex flex-col justify-between">
+            <div>
+              <div class="flex items-center gap-2 text-[#1A9080] mb-1">
+                <i data-lucide="calculator" class="w-5 h-5 shrink-0"></i>
+                <h4 class="font-sans font-bold text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                  Calculators
+                </h4>
+              </div>
+              <p class="font-sans text-[12px] text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 mb-3 leading-tight">
+                Know your numbers before you spend a dollar.
+              </p>
+              <div class="w-10 h-[2px] bg-[#1A9080] mb-4"></div>
+
+              <div class="flex flex-col gap-1">
+                <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Paid Ads ROI Calculator">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="trending-up" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                    <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors">
+                      Paid Ads ROI Calculator
+                    </span>
+                  </div>
+                  <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                    How much to spend on Google Ads to hit your revenue target.
+                  </span>
+                </a>
+
+                <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Quote Win Rate Optimiser">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="bar-chart-2" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                    <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors">
+                      Quote Win Rate Optimiser
+                    </span>
+                  </div>
+                  <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                    What’s your close rate costing you each month?
+                  </span>
+                </a>
+
+                <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Job Value Calculator">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="dollar-sign" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                    <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors">
+                      Job Value Calculator
+                    </span>
+                  </div>
+                  <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                    Annual impact of a $200 increase in average job value.
+                  </span>
+                </a>
+
+                <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Missed Lead Cost Calculator">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="phone-missed" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                    <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors">
+                      Missed Lead Cost Calculator
+                    </span>
+                  </div>
+                  <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                    The true monthly cost of slow lead response time.
+                  </span>
+                </a>
+
+                <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Referral Program Value Estimator">
+                  <div class="flex items-center gap-2">
+                    <i data-lucide="users" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                    <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors">
+                      Referral Program Value Estimator
+                    </span>
+                  </div>
+                  <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                    What a structured referral system is worth per year.
+                  </span>
+                </a>
+              </div>
+            </div>
+
+            <!-- COLUMN 2 [25%] — MARKET INTELLIGENCE -->
+            <div class="col-span-3 border-r border-[#1C1C1A]/10 dark:border-[#2E2E2C] pr-6 flex flex-col justify-between">
+              <div>
+                <div class="flex items-center gap-2 text-[#1A9080] mb-1">
+                  <i data-lucide="globe" class="w-5 h-5 shrink-0"></i>
+                  <h4 class="font-sans font-bold text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC]">
+                    Market Intelligence
+                  </h4>
+                </div>
+                <p class="font-sans text-[12px] text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 mb-3 leading-tight">
+                  Know your market better than your competitors.
+                </p>
+                <div class="w-10 h-[2px] bg-[#1A9080] mb-4"></div>
+
+                <div class="flex flex-col gap-1">
+                  <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Melbourne Trades Demand Report 2026">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="file-text" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                      <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors flex items-center gap-2 flex-wrap">
+                        Melbourne Trades Demand Report 2026
+                        <span class="bg-[#E8622A] text-[#F5F2EC] text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase tracking-wider scale-90">
+                          NEW
+                        </span>
+                      </span>
+                    </div>
+                    <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                      Search volume, competition, and growth trends by trade.
+                    </span>
+                  </a>
+
+                  <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Suburb Opportunity Index">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="map" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                      <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors flex items-center gap-2 flex-wrap">
+                        Suburb Opportunity Index
+                        <span class="bg-[#E8622A] text-[#F5F2EC] text-[9px] font-sans font-bold px-2 py-0.5 rounded-full uppercase tracking-wider scale-90">
+                          NEW
+                        </span>
+                      </span>
+                    </div>
+                    <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                      Highest-demand, lowest-competition Melbourne suburbs.
+                    </span>
+                  </a>
+
+                  <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Google Ads Trade Benchmarks">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="activity" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                      <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors flex items-center gap-2 flex-wrap">
+                        Google Ads Trade Benchmarks
+                      </span>
+                    </div>
+                    <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                      Avg CTR, CPC, and conversion rates for AU trades.
+                    </span>
+                  </a>
+
+                  <a href="#" class="coming-soon-btn group flex flex-col gap-0.5 py-[10px] px-3 rounded-lg border-l-3 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/20 transition-all duration-150" data-name="Seasonal Demand Map">
+                    <div class="flex items-center gap-2">
+                      <i data-lucide="calendar-days" class="w-4 h-4 text-[#1A9080] shrink-0"></i>
+                      <span class="font-sans font-medium text-[15px] text-[#1C1C1A] dark:text-[#F5F2EC] group-hover:text-[#1A9080] transition-colors flex items-center gap-2 flex-wrap">
+                        Seasonal Demand Map
+                      </span>
+                    </div>
+                    <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
+                      Emergency and seasonal peaks by trade and month.
+                    </span>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <!-- COLUMN 3 [25%] — FEATURED TOOL CARD -->
+            <div class="col-span-3 flex flex-col justify-between bg-[#1A9080] text-[#F5F2EC] rounded-[20px] p-7 shadow-sm">
+              <div>
+                <span class="bg-[#E8622A] text-[#F5F2EC] text-[10px] font-sans font-bold px-2 py-0.5 rounded-full uppercase tracking-wider inline-block">
+                  FREE TOOL
+                </span>
+                <h4 class="font-sans font-bold text-[22px] leading-[1.2] text-white mt-3">
+                  Revenue Leak Audit
+                </h4>
+                <p class="font-sans text-[14px] text-white/80 leading-[1.6] mt-2">
+                  12 questions. 3 min 47 sec. Find out exactly where your trade business is bleeding revenue.
+                </p>
+
+                <!-- Stats Row -->
+                <div class="flex items-center gap-1.5 text-white/65 text-[13px] mt-3">
+                  <i data-lucide="users" class="w-3.5 h-3.5 shrink-0 text-white/80"></i>
+                  <span>2,847 trades audited &middot; Avg. leak: $6,800/mo</span>
+                </div>
+              </div>
+
+              <!-- Mini static leak meter preview -->
+              <div class="w-[120px] mx-auto mt-4 mb-2 flex justify-center">
+                <svg viewBox="0 0 100 55" class="w-[120px] h-auto overflow-visible">
+                  <defs>
+                    <linearGradient id="miniGaugeGradientNavbar2" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#87c7be" />
+                      <stop offset="50%" stopColor="#C9A96E" />
+                      <stop offset="100%" stopColor="#ff9a70" />
+                    </linearGradient>
+                  </defs>
+                  <path
+                    d="M 10 50 A 40 40 0 0 1 90 50"
+                    fill="none"
+                    stroke="#147265"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                  />
+                  <path
+                    d="M 10 50 A 40 40 0 0 1 90 50"
+                    fill="none"
+                    stroke="url(#miniGaugeGradientNavbar2)"
+                    strokeWidth="8"
+                    strokeLinecap="round"
+                    strokeDasharray="125"
+                    strokeDashoffset="50"
+                  />
+                  <g class="origin-[50px_50px]" style="transform: rotate(18deg);">
+                    <line x1="50" y1="50" x2="50" y2="15" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
+                  </g>
+                </svg>
+              </div>
+
+              <a
+                href="/audit"
+                class="w-full bg-[#E8622A] hover:bg-[#ff763d] text-white font-sans font-bold text-[15px] py-3 px-2 rounded-full transition-all duration-300 hover:scale-[1.03] text-center shadow-md shadow-[#E8622A]/10 mt-4 block"
+              >
+                Discover Your Score &rarr;
+              </a>
+            </div>
+
+            <!-- COLUMN 4 [25%] — CTA CARD -->
+            <div class="col-span-3 relative flex flex-col justify-between bg-[#1C1C1A] text-[#F5F2EC] rounded-[20px] p-7 shadow-sm overflow-hidden text-left">
+              <!-- 3px Teal top bar decoration -->
+              <div class="absolute top-0 left-0 right-0 h-[3px] bg-[#1A9080]"></div>
+
+              <div class="mt-1">
+                <span class="text-[#C9A96E] font-sans font-bold text-[12px] uppercase tracking-[2px] block">
+                  READY TO ACT?
+                </span>
+                <h4 class="font-sans font-bold text-[22px] leading-[1.2] text-white mt-2">
+                  Stop diagnosing.
+                  <br />
+                  Start recovering.
+                </h4>
+                <p class="font-sans text-[14px] text-white/65 leading-[1.6] mt-2.5">
+                  Get a 30-minute Revenue Recovery Call with a Stratapult systems specialist. No pitch. Just a plan.
+                </p>
+              </div>
+
+              <div class="mt-5">
+                <a
+                  href="/#book"
+                  class="w-full bg-[#E8622A] hover:bg-[#ff763d] text-white font-sans font-bold text-[15px] py-3 px-2 rounded-full transition-all duration-300 hover:scale-[1.03] text-center shadow-md shadow-[#E8622A]/10 block"
+                >
+                  Book Free Call &rarr;
+                </a>
+                <span class="text-center text-white/45 text-[12px] font-sans block mt-2">
+                  No lock-in. No obligation.
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Backdrop overlay -->
+        <div
+          id="mega-menu-backdrop"
+          class="hidden md:block absolute inset-0 top-[72px] bg-[#1C1C1A]/30 z-30 backdrop-blur-xs transition-opacity duration-300 opacity-0 pointer-events-none"
+        ></div>
+      </nav>
+
+      <!-- Dynamic Toast for coming soon links -->
+      <div id="coming-soon-toast" class="fixed bottom-6 right-6 z-[9999] bg-[#1C1C1A] dark:bg-[#F5F2EC] text-[#F5F2EC] dark:text-[#1C1C1A] border border-[#C9A96E]/30 rounded-xl px-5 py-3.5 shadow-[0_8px_30px_rgba(0,0,0,0.12)] max-w-sm font-sans font-medium text-[14px] flex items-center gap-2.5 transition-all duration-300 opacity-0 translate-y-4 pointer-events-none">
+        <div class="w-2 h-2 rounded-full bg-[#E8622A] animate-ping"></div>
+        <span id="coming-soon-toast-text">Paid Ads ROI Calculator is coming soon!</span>
+      </div>
     </nav>
 
-    <!-- MOBILE MENU DRAWER -->
-    <div id="mobile-drawer" class="fixed inset-0 z-50 bg-[#F5F2EC] dark:bg-[#141412] flex flex-col justify-between p-6 transition-transform duration-500 ease-out translate-x-full md:hidden overflow-y-auto">
+    <!-- MOBILE MEGA MENU DRAWER -->
+    <div
+      id="mobile-drawer"
+      class="fixed inset-0 z-50 bg-[#F5F2EC] dark:bg-[#141412] flex flex-col justify-between p-6 transition-transform duration-500 ease-out translate-x-full md:hidden overflow-y-auto"
+    >
       <!-- Top bar with close button -->
       <div class="flex justify-between items-center h-[72px] w-full px-2">
         <span class="font-sans font-extrabold text-[20px] tracking-[0.12em] text-[#1C1C1A] dark:text-[#F5F2EC]">
           STRATAPULT<sup class="text-[#1A9080] font-bold text-[0.6em] relative -top-1">OS</sup>
         </span>
-        <button id="mobile-menu-close" class="p-2 text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#E8622A] transition-colors" aria-label="Close navigation menu">
+        <button
+          id="mobile-menu-close"
+          class="p-2 text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#E8622A] transition-colors"
+          aria-label="Close navigation menu"
+        >
           <i data-lucide="x" class="w-[24px] h-[24px]"></i>
         </button>
       </div>
 
-      <!-- Links -->
+      <!-- Center Scrollable Area -->
       <div class="flex flex-col gap-6 my-auto py-8">
+        <!-- Main Links -->
         <div class="flex flex-col gap-5 text-center">
-          <a href="/" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Home</a>
-          <a href="/#our-os" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Systems</a>
-          <a href="/#results" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Results</a>
-          <a href="/#pricing" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Resources</a>
+          <a
+            href="/#results"
+            class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors"
+          >
+            Results
+          </a>
+
+          <!-- Mobile Resources Accordion Trigger -->
+          <div class="flex flex-col items-center">
+            <button
+              id="mobile-accordion-trigger"
+              class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors inline-flex items-center gap-2 justify-center"
+            >
+              Resources
+              <i data-lucide="chevron-down" id="mobile-accordion-chevron" class="text-[#1A9080] w-6 h-6 transition-transform duration-300"></i>
+            </button>
+
+            <!-- Accordion Content -->
+            <div
+              id="mobile-accordion-content"
+              class="w-full overflow-hidden transition-all duration-300 max-h-0 opacity-0"
+            >
+              <div class="bg-[#1C1C1A]/5 dark:bg-white/5 rounded-2xl p-4 flex flex-col gap-5 max-w-sm mx-auto text-left mt-4">
+                <!-- Calculators section -->
+                <div>
+                  <div class="flex items-center gap-2 text-[#1A9080] font-sans font-bold text-[13px] uppercase tracking-wider mb-2 select-none">
+                    <i data-lucide="calculator" class="w-4 h-4"></i>
+                    <span>Calculators</span>
+                  </div>
+                  <div class="flex flex-col gap-1.5 pl-1.5">
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Paid Ads ROI Calculator">
+                      <i data-lucide="trending-up" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="truncate">Paid Ads ROI Calculator</span>
+                    </a>
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Quote Win Rate Optimiser">
+                      <i data-lucide="bar-chart-2" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="truncate">Quote Win Rate Optimiser</span>
+                    </a>
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Job Value Calculator">
+                      <i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="truncate">Job Value Calculator</span>
+                    </a>
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Missed Lead Cost Calculator">
+                      <i data-lucide="phone-missed" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="truncate">Missed Lead Cost Calculator</span>
+                    </a>
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Referral Program Value Estimator">
+                      <i data-lucide="users" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="truncate">Referral Program Value Estimator</span>
+                    </a>
+                  </div>
+                </div>
+
+                <!-- Market Intelligence section -->
+                <div>
+                  <div class="flex items-center gap-2 text-[#1A9080] font-sans font-bold text-[13px] uppercase tracking-wider mb-2 select-none">
+                    <i data-lucide="globe" class="w-4 h-4"></i>
+                    <span>Market Intelligence</span>
+                  </div>
+                  <div class="flex flex-col gap-1.5 pl-1.5">
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Melbourne Trades Demand Report 2026">
+                      <i data-lucide="file-text" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="flex-1 truncate">Melbourne Trades Demand Report 2026</span>
+                      <span class="bg-[#E8622A] text-[#F5F2EC] text-[8px] font-sans font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 scale-90">NEW</span>
+                    </a>
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Suburb Opportunity Index">
+                      <i data-lucide="map" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="flex-1 truncate">Suburb Opportunity Index</span>
+                      <span class="bg-[#E8622A] text-[#F5F2EC] text-[8px] font-sans font-bold px-1.5 py-0.5 rounded-full uppercase tracking-wider shrink-0 scale-90">NEW</span>
+                    </a>
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Google Ads Trade Benchmarks">
+                      <i data-lucide="activity" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="flex-1 truncate">Google Ads Trade Benchmarks</span>
+                    </a>
+                    <a href="#" class="coming-soon-btn flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all" data-name="Seasonal Demand Map">
+                      <i data-lucide="calendar-days" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                      <span class="flex-1 truncate">Seasonal Demand Map</span>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="h-[1px] bg-[#1C1C1A]/10 dark:bg-white/10 my-1"></div>
+
+                <!-- Revenue Leak Audit Link -->
+                <a
+                  href="/audit"
+                  class="flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans font-bold text-[14px] text-[#E8622A] transition-all"
+                >
+                  <i data-lucide="zap" class="w-3.5 h-3.5 text-[#E8622A] shrink-0"></i>
+                  <span>Revenue Leak Audit</span>
+                </a>
+
+                <!-- Book Free Call Link -->
+                <a
+                  href="/#book"
+                  class="flex items-center gap-2.5 p-2 rounded-lg border-l-2 border-transparent hover:border-[#1A9080] hover:bg-[#C9A96E]/10 font-sans font-semibold text-[14px] text-[#1C1C1A] dark:text-[#F5F2EC] transition-all"
+                >
+                  <i data-lucide="phone" class="w-3.5 h-3.5 text-[#1A9080] shrink-0"></i>
+                  <span>Book Free Call</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <a
+            href="/#how-it-works"
+            class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors"
+          >
+            How It Works
+          </a>
+          <a
+            href="/#pricing"
+            class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors"
+          >
+            Pricing
+          </a>
+        </div>
+
+        <div class="h-[1px] bg-[#1C1C1A]/10 dark:bg-[#2E2E2C] w-24 mx-auto my-2"></div>
+
+        <!-- Quick list of Systems -->
+        <div class="text-center">
+          <span class="font-sans font-bold text-[10px] text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 uppercase tracking-widest block mb-3">
+            AVAILABLE OPERATING SYSTEMS
+          </span>
+          <div class="flex flex-wrap justify-center gap-2 max-w-sm mx-auto">
+            <a
+              href="https://flux-os-cyan.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="bg-[#1A9080]/10 text-[#1A9080] font-sans font-bold text-xs px-3.5 py-1.5 rounded-full flex items-center gap-1.5"
+            >
+              <i data-lucide="zap" class="w-3 h-3"></i> FluxOS <span class="w-1.5 h-1.5 rounded-full bg-[#1A9080] animate-pulse"></span>
+            </a>
+            <span class="bg-[#1C1C1A]/5 dark:bg-white/5 text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 font-sans font-medium text-xs px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
+              <i data-lucide="droplets" class="w-3 h-3"></i> AquaOS
+            </span>
+            <span class="bg-[#1C1C1A]/5 dark:bg-white/5 text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 font-sans font-medium text-xs px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
+              <i data-lucide="hard-hat" class="w-3 h-3"></i> BuildOS
+            </span>
+            <span class="bg-[#1C1C1A]/5 dark:bg-white/5 text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 font-sans font-medium text-xs px-3.5 py-1.5 rounded-full flex items-center gap-1.5">
+              <i data-lucide="flame" class="w-3 h-3"></i> ThermoOS
+            </span>
+          </div>
         </div>
       </div>
 
-      <!-- Action Button -->
+      <!-- Bottom Booking -->
       <div class="flex flex-col gap-4 w-full max-w-sm mx-auto mb-4 text-center">
-        <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="w-full bg-[#E8622A] text-white font-sans font-bold py-4 rounded-full text-center hover:bg-[#ff763d] transition-colors">
-          Get FluxOS &rarr;
+        <a
+          href="/#book"
+          class="w-full bg-[#E8622A] text-white font-sans font-bold py-4 rounded-full hover:bg-[#ff763d] transition-colors text-center"
+        >
+          Book Strategy Call
         </a>
-        <span class="text-xs text-[#6B6B68] dark:text-[#9CA3AF] font-sans">
+        <span class="text-xs text-[#6B6B68] dark:text-[#9CA3AF] font-sans block">
           hello@stratapult.com.au
         </span>
       </div>

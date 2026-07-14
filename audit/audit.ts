@@ -166,10 +166,28 @@ document.addEventListener('DOMContentLoaded', () => {
   const GHL_WEBHOOK_URL = (import.meta as any).env?.VITE_GHL_WEBHOOK_URL || "https://services.leadconnectorhq.com/hooks/placeholder_webhook_url";
 
   // 2. STATE VARIABLES
+  interface Answer {
+    score: number;
+    sectionIndex: number;
+  }
   let currentQ = 0;
   let selectedPoints: (number | null)[] = new Array(12).fill(null);
   let selectedIndices: (number | null)[] = new Array(12).fill(null);
+  let answers: (Answer | null)[] = new Array(12).fill(null);
   let totalScore = 0;
+
+  function calculateScores() {
+    let sum = 0;
+    for (let i = 0; i < 12; i++) {
+      if (answers[i]) {
+        sum += answers[i]!.score;
+      }
+    }
+    totalScore = sum;
+    const leakPercentage = Math.round(((36 - totalScore) / 36) * 100);
+    const estimatedMonthlyLeak = Math.round((leakPercentage / 100) * 15000);
+    return { totalScore, leakPercentage, estimatedMonthlyLeak };
+  }
 
   // 3. STATE MACHINE
   function showState(stateName: string) {
@@ -285,8 +303,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const optionsHTML = q.options.map((opt, i) => {
         const isSelected = selectedIndices[index] === i;
         const cardClass = isSelected 
-          ? 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option' 
-          : 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option';
+          ? 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option option-card selected' 
+          : 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option option-card';
         
         const circleClass = isSelected 
           ? 'w-5 h-5 rounded-full bg-[#1A9080] flex items-center justify-center shrink-0 text-white radio-circle' 
@@ -295,7 +313,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const checkHTML = isSelected ? '<i data-lucide="check" class="w-3 h-3 text-white"></i>' : '';
 
         return `
-          <div class="${cardClass}" data-points="${opt.pts}" data-index="${i}">
+          <div class="${cardClass}" data-points="${3 - i}" data-index="${i}">
             <div class="${circleClass}">${checkHTML}</div>
             <span class="font-sans font-medium text-[15px] sm:text-[16px] text-[#1C1C1A] dark:text-[#F5F2EC]">${opt.text}</span>
           </div>
@@ -395,7 +413,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!option) return;
           
           container.querySelectorAll('.answer-option').forEach(el => {
-            el.className = 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option';
+            el.className = 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option option-card';
             const circle = el.querySelector('.radio-circle');
             if (circle) {
               circle.className = 'w-5 h-5 rounded-full border-1.5 border-[#1C1C1A]/30 dark:border-white/30 flex items-center justify-center shrink-0 transition-all duration-150 radio-circle';
@@ -403,16 +421,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
           
-          option.className = 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option';
+          option.className = 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option option-card selected';
           const activeCircle = option.querySelector('.radio-circle');
           if (activeCircle) {
             activeCircle.className = 'w-5 h-5 rounded-full bg-[#1A9080] flex items-center justify-center shrink-0 text-white radio-circle';
             activeCircle.innerHTML = '<i data-lucide="check" class="w-3 h-3 text-white"></i>';
           }
           
-          const pts = parseInt(option.getAttribute('data-points') || '0', 10);
           const optIndex = parseInt(option.getAttribute('data-index') || '0', 10);
-          selectedPoints[currentQ] = pts;
+          const score = 3 - optIndex;
+          const sectionIndex = QUESTIONS[currentQ].sectionIndex;
+
+          answers[currentQ] = { score, sectionIndex };
+          selectedPoints[currentQ] = score;
           selectedIndices[currentQ] = optIndex;
           
           saveSessionState();
@@ -421,8 +442,8 @@ document.addEventListener('DOMContentLoaded', () => {
             (window as any).lucide.createIcons();
           }
   
-          totalScore = selectedPoints.filter(p => p !== null).reduce((a, b: any) => a + b, 0);
-          updateLeakMeter(totalScore);
+          const metrics = calculateScores();
+          updateLeakMeter(metrics.totalScore);
           
           const nextBtn = document.getElementById('next-btn');
           if (nextBtn) nextBtn.style.display = 'flex';
@@ -594,11 +615,23 @@ document.addEventListener('DOMContentLoaded', () => {
       if (btnText) btnText.textContent = 'Calculating Scores...';
       if (btn) btn.disabled = true;
       
-      const s1 = selectedPoints.slice(0,4).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-      const s2 = selectedPoints.slice(4,7).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-      const s3 = selectedPoints.slice(7,10).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-      const s4 = selectedPoints.slice(10,12).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-      const leakPct = Math.round(((36 - totalScore) / 36) * 100);
+      let marketingScore = 0;
+      let leadCaptureScore = 0;
+      let pricingScore = 0;
+      let retentionScore = 0;
+
+      for (let i = 0; i < 12; i++) {
+        const ans = answers[i];
+        if (ans) {
+          if (ans.sectionIndex === 1) marketingScore += ans.score;
+          else if (ans.sectionIndex === 2) leadCaptureScore += ans.score;
+          else if (ans.sectionIndex === 3) pricingScore += ans.score;
+          else if (ans.sectionIndex === 4) retentionScore += ans.score;
+        }
+      }
+
+      const totalScoreCalculated = marketingScore + leadCaptureScore + pricingScore + retentionScore;
+      const leakPct = Math.round(((36 - totalScoreCalculated) / 36) * 100);
       const estLeak = Math.round((leakPct / 100) * 15000);
       
       try {
@@ -611,20 +644,19 @@ document.addEventListener('DOMContentLoaded', () => {
             phone,
             tradeType,
             suburb,
-            totalScore,
+            totalScore: totalScoreCalculated,
             leakPercentage: leakPct,
             estimatedMonthlyLeak: estLeak,
-            marketingScore: s1,
-            leadCaptureScore: s2,
-            pricingScore: s3,
-            retentionScore: s4
+            marketingScore,
+            leadCaptureScore,
+            pricingScore,
+            retentionScore
           })
         });
       } catch (err) {
         console.log('Webhook error (non-blocking):', err);
       }
       
-      clearAuditState();
       renderResults();
       showState('results');
     });
@@ -632,42 +664,71 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 9. RESULTS RENDERER
   function renderResults() {
-    const s1 = selectedPoints.slice(0,4).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-    const s2 = selectedPoints.slice(4,7).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-    const s3 = selectedPoints.slice(7,10).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-    const s4 = selectedPoints.slice(10,12).filter(p=>p!==null).reduce((a,b: any)=>a+b,0);
-    const leakPct = Math.round(((36 - totalScore) / 36) * 100);
-    const estLeak = Math.round((leakPct / 100) * 15000);
-    
-    let tier = '';
-    let tierBg = '';
-    let tierText = '';
+    let s1 = 0; // Getting Found (sectionIndex 1)
+    let s2 = 0; // Capturing Leads (sectionIndex 2)
+    let s3 = 0; // Converting Jobs (sectionIndex 3)
+    let s4 = 0; // Retain & Grow (sectionIndex 4)
+
+    for (let i = 0; i < 12; i++) {
+      const ans = answers[i];
+      if (ans) {
+        if (ans.sectionIndex === 1) s1 += ans.score;
+        else if (ans.sectionIndex === 2) s2 += ans.score;
+        else if (ans.sectionIndex === 3) s3 += ans.score;
+        else if (ans.sectionIndex === 4) s4 += ans.score;
+      }
+    }
+
+    const calculatedTotalScore = s1 + s2 + s3 + s4;
+    totalScore = calculatedTotalScore; // Keep global in sync
+
+    const leakPercentage = Math.round(((36 - calculatedTotalScore) / 36) * 100);
+    const estimatedMonthlyLeak = Math.round((leakPercentage / 100) * 15000);
+    const formattedLeak = '$' + estimatedMonthlyLeak.toLocaleString() + '/month';
+    const needleDeg = -90 + (leakPercentage / 100 * 180);
+
+    let tierLabel = '';
+    let tierBgClass = '';
+    let tierTextClass = '';
+    let tierBorder = '';
     let tierIcon = '';
     let tierCopy = '';
     let tierCTAHtml = '';
-    
-    if (totalScore <= 9) {
-      tier = 'CRITICAL REVENUE LEAK'; tierBg = '#E8622A'; tierText = '#F5F2EC';
-      tierIcon = 'alert-triangle';
-      tierCopy = "Your operation has significant room to grow. You’re likely losing 60–80% of potential leads to competitors who respond faster. A single OS deployment can dramatically change your monthly enquiry flow — we’ve seen trades go from 3 jobs/week to 11 in 90 days.";
-      tierCTAHtml = `<a href="/contact" style="display:block;background:#F5F2EC;color:#E8622A;text-align:center;padding:16px;border-radius:999px;font-weight:700;text-decoration:none;margin-top:20px;">Book My Free Revenue Recovery Call →</a>`;
-    } else if (totalScore <= 18) {
-      tier = 'SIGNIFICANT REVENUE LEAK'; tierBg = '#D97706'; tierText = '#F5F2EC';
-      tierIcon = 'trending-down';
-      tierCopy = "You’ve got some fundamentals in place, but critical gaps in capture and conversion are letting leads slip through. Customers are choosing you — but some are choosing someone else because they responded faster or had more reviews.";
-      tierCTAHtml = `<a href="/contact" style="display:block;background:#F5F2EC;color:#D97706;text-align:center;padding:16px;border-radius:999px;font-weight:700;text-decoration:none;margin-top:20px;">Book My Free Revenue Recovery Call →</a>`;
-    } else if (totalScore <= 27) {
-      tier = 'MODERATE REVENUE LEAK'; tierBg = '#C9A96E'; tierText = '#1C1C1A';
-      tierIcon = 'alert-circle';
-      tierCopy = "You’re running a solid operation. The leaks at this level are subtle but compounding — missed follow-ups, underpriced jobs, quotes that fell through the cracks. A few targeted fixes are typically worth $2K–$4K/month.";
-      tierCTAHtml = `<a href="/#our-os" style="display:block;background:#1C1C1A;color:#F5F2EC;text-align:center;padding:16px;border-radius:999px;font-weight:700;text-decoration:none;margin-top:20px;">View OS Systems →</a>`;
-    } else {
-      tier = 'REVENUE OPTIMISED'; tierBg = '#1A9080'; tierText = '#F5F2EC';
+
+    if (calculatedTotalScore >= 28) {
+      tierLabel = 'Optimised';
+      tierBgClass = 'bg-[#1A9080]/10 dark:bg-[#1A9080]/20';
+      tierTextClass = 'text-[#1A9080] dark:text-[#22D3EE]';
+      tierBorder = 'border-[#1A9080]/30';
       tierIcon = 'check-circle';
       tierCopy = "You’re in the top 5% of Melbourne tradies by systems maturity. The opportunity isn’t plugging leaks — it’s amplification. Let’s stack OS systems to compound what’s already working.";
-      tierCTAHtml = `<a href="/contact" style="display:block;background:#E8622A;color:#F5F2EC;text-align:center;padding:16px;border-radius:999px;font-weight:700;text-decoration:none;margin-top:20px;">Let’s Talk →</a>`;
+      tierCTAHtml = `<a href="/#our-os" class="inline-flex items-center justify-center bg-[#1A9080] hover:bg-[#1A9080]/90 text-white px-6 py-3 rounded-full text-sm font-sans font-bold transition-all text-center">View OS Systems →</a>`;
+    } else if (calculatedTotalScore >= 19) {
+      tierLabel = 'Moderate Leak';
+      tierBgClass = 'bg-[#C9A96E]/10 dark:bg-[#C9A96E]/20';
+      tierTextClass = 'text-[#C9A96E] dark:text-[#FBBF24]';
+      tierBorder = 'border-[#C9A96E]/30';
+      tierIcon = 'alert-circle';
+      tierCopy = "You’re running a solid operation. The leaks at this level are subtle but compounding — missed follow-ups, underpriced jobs, quotes that fell through the cracks. A few targeted fixes are typically worth $2K–$4K/month.";
+      tierCTAHtml = `<a href="/#our-os" class="inline-flex items-center justify-center bg-[#C9A96E] hover:bg-[#C9A96E]/90 text-white px-6 py-3 rounded-full text-sm font-sans font-bold transition-all text-center">View OS Systems →</a>`;
+    } else if (calculatedTotalScore >= 10) {
+      tierLabel = 'Significant Leak';
+      tierBgClass = 'bg-[#D97706]/10 dark:bg-[#D97706]/20';
+      tierTextClass = 'text-[#D97706] dark:text-[#F59E0B]';
+      tierBorder = 'border-[#D97706]/30';
+      tierIcon = 'trending-down';
+      tierCopy = "You’ve got some fundamentals in place, but critical gaps in capture and conversion are letting leads slip through. Customers are choosing you — but some are choosing someone else because they responded faster or had more reviews.";
+      tierCTAHtml = `<a href="https://meetings.hubspot.com/stratapult/discovery" target="_blank" class="inline-flex items-center justify-center bg-[#D97706] hover:bg-[#D97706]/90 text-white px-6 py-3 rounded-full text-sm font-sans font-bold transition-all text-center">Book My Free Revenue Recovery Call →</a>`;
+    } else {
+      tierLabel = 'Critical Leak';
+      tierBgClass = 'bg-[#E8622A]/10 dark:bg-[#E8622A]/20';
+      tierTextClass = 'text-[#E8622A] dark:text-[#F97316]';
+      tierBorder = 'border-[#E8622A]/30';
+      tierIcon = 'alert-triangle';
+      tierCopy = "Your operation has significant room to grow. You’re likely losing 60–80% of potential leads to competitors who respond faster. A single OS deployment can dramatically change your monthly enquiry flow — we’ve seen trades go from 3 jobs/week to 11 in 90 days.";
+      tierCTAHtml = `<a href="https://meetings.hubspot.com/stratapult/discovery" target="_blank" class="inline-flex items-center justify-center bg-[#E8622A] hover:bg-[#E8622A]/90 text-white px-6 py-3 rounded-full text-sm font-sans font-bold transition-all text-center">Book My Free Revenue Recovery Call →</a>`;
     }
-    
+
     const sectionData = [
       { label: 'Getting Found', icon: 'search', score: s1, max: 12 },
       { label: 'Capturing Leads', icon: 'phone', score: s2, max: 9 },
@@ -679,61 +740,143 @@ document.addEventListener('DOMContentLoaded', () => {
       const pct = Math.round((s.score / s.max) * 100);
       const barColor = pct < 50 ? '#E8622A' : pct < 75 ? '#C9A96E' : '#1A9080';
       return `
-        <div style="margin-bottom:20px;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-            <span style="font-weight:600;color:var(--text-charcoal);">
-              <i data-lucide="${s.icon}" style="width:16px;height:16px;display:inline;vertical-align:middle;margin-right:6px;"></i>
+        <div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="font-sans font-bold text-sm text-[#1C1C1A] dark:text-[#F5F2EC] flex items-center gap-2">
+              <i data-lucide="${s.icon}" class="w-4 h-4 text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50"></i>
               ${s.label}
             </span>
-            <span style="color:var(--text-charcoal);opacity:0.6;font-size:14px;">${s.score} / ${s.max}</span>
+            <span class="font-sans font-semibold text-xs text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50">${s.score} / ${s.max} (${pct}%)</span>
           </div>
-          <div style="background:var(--color-border);border-radius:999px;height:8px;overflow:hidden;">
-            <div style="width:${pct}%;background:${barColor};height:8px;border-radius:999px;transition:width 0.8s ease;"></div>
+          <div class="w-full bg-[#E8E5DF] dark:bg-[#2E2E2C] rounded-full h-2 overflow-hidden">
+            <div class="h-full rounded-full transition-all duration-1000" style="width: ${pct}%; background-color: ${barColor};"></div>
           </div>
         </div>
       `;
     }).join('');
-    
+
     const stateResults = document.getElementById('state-results');
     if (stateResults) {
       stateResults.innerHTML = `
-        <div style="text-align:center;padding-bottom:32px;">
-          <div style="display:inline-block;width:120px;height:120px;border-radius:50%;border:6px solid ${tierBg};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
-            <div>
-              <div style="font-size:32px;font-weight:800;color:var(--text-charcoal);">${totalScore}</div>
-              <div style="font-size:13px;color:var(--text-charcoal);opacity:0.5;">/ 36</div>
+        <div class="w-full max-w-3xl mx-auto flex flex-col items-center py-6 text-left">
+          
+          <!-- Header / Headline -->
+          <div class="text-center mb-10 w-full">
+            <span class="font-sans font-bold text-xs text-[#E8622A] uppercase tracking-[2px]">YOUR CUSTOM REPORT</span>
+            <h2 class="font-serif font-bold text-3xl sm:text-4xl text-[#1C1C1A] dark:text-[#F5F2EC] mt-2 mb-4 leading-tight">
+              Revenue Leak Audit Results
+            </h2>
+            <p class="font-sans text-sm sm:text-base text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 max-w-lg mx-auto">
+              Here is the complete analysis of your trade business systems. We've mapped your results against standard benchmarks.
+            </p>
+          </div>
+
+          <!-- Key Metrics Bento Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full mb-8">
+            
+            <!-- Left: Score & Leak Info -->
+            <div class="bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col justify-between">
+              <div>
+                <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-[11px] font-sans font-bold tracking-[2.5px] uppercase block mb-1">AUDIT RATING</span>
+                
+                <!-- Status Badge -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border ${tierBorder} ${tierBgClass} ${tierTextClass} font-sans font-bold text-sm tracking-wide mb-6">
+                  <i data-lucide="${tierIcon}" class="w-4 h-4"></i>
+                  <span>${tierLabel}</span>
+                </div>
+                
+                <div class="mb-6">
+                  <span class="text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 text-xs font-sans font-bold block">OVERALL SCORE</span>
+                  <div class="flex items-baseline gap-1 mt-1">
+                    <span class="text-4xl sm:text-5xl font-display font-black text-[#1C1C1A] dark:text-[#F5F2EC]">${calculatedTotalScore}</span>
+                    <span class="text-lg sm:text-xl text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40">/ 36 pts</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="border-t border-[#E8E5DF] dark:border-[#2E2E2C] pt-6 flex flex-col gap-4">
+                <div>
+                  <span class="text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 text-xs font-sans font-bold block uppercase tracking-wider">REVENUE LEAKAGE</span>
+                  <span class="text-2xl sm:text-3xl font-display font-bold text-[#E8622A] mt-1 block">${leakPercentage}%</span>
+                </div>
+                <div>
+                  <span class="text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 text-xs font-sans font-bold block uppercase tracking-wider">ESTIMATED MONTHLY LOSS</span>
+                  <span class="text-3xl sm:text-4xl font-display font-black text-[#1C1C1A] dark:text-[#F5F2EC] mt-1 block">${formattedLeak}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Dynamic Gauge -->
+            <div class="bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 sm:p-8 shadow-sm flex flex-col items-center justify-center">
+              <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-[11px] font-sans font-bold tracking-[2.5px] uppercase block mb-4">REVENUE LOSS METER</span>
+              
+              <div class="w-full max-w-[260px] aspect-[280/155] relative">
+                <svg width="280" height="155" viewBox="0 0 280 155" class="w-full overflow-visible">
+                  <defs>
+                    <linearGradient id="resultsGaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#1A9080" />
+                      <stop offset="50%" stop-color="#C9A96E" />
+                      <stop offset="100%" stop-color="#E8622A" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 30 120 A 110 110 0 0 1 250 120" fill="none" stroke="#E8E5DF" stroke-width="18" stroke-linecap="round" class="dark:stroke-[#2E2E2C]" />
+                  <path d="M 30 120 A 110 110 0 0 1 250 120" fill="none" stroke="url(#resultsGaugeGrad)" stroke-width="18" stroke-linecap="round" />
+                  <text x="25" y="145" fill="#1A9080" font-size="10" font-family="var(--font-sans)" font-weight="700" text-anchor="start">FULL REVENUE</text>
+                  <text x="255" y="145" fill="#E8622A" font-size="10" font-family="var(--font-sans)" font-weight="700" text-anchor="end">MAJOR LEAK</text>
+                  <!-- Needle -->
+                  <g id="results-needle" class="origin-[140px_120px]" style="transform: rotate(${needleDeg}deg); transition: transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                    <line x1="140" y1="120" x2="140" y2="20" stroke="#1C1C1A" stroke-width="3" stroke-linecap="round" class="dark:stroke-[#F5F2EC]" />
+                    <circle cx="140" cy="120" r="7" fill="#1C1C1A" class="dark:fill-[#F5F2EC]" />
+                  </g>
+                </svg>
+              </div>
+
+              <p class="text-center text-xs text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 font-sans mt-4">
+                Needle indicates your business's current leakage level based on selected answers.
+              </p>
+            </div>
+
+          </div>
+
+          <!-- Detailed System Breakdown -->
+          <div class="bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 sm:p-8 shadow-sm w-full mb-8">
+            <h3 class="font-serif font-bold text-xl text-[#1C1C1A] dark:text-[#F5F2EC] mb-6">Detailed System Breakdown</h3>
+            <div class="flex flex-col gap-6">
+              ${sectionsHTML}
             </div>
           </div>
-        </div>
-        
-        <!-- Tier banner -->
-        <div style="background:${tierBg};color:${tierText};border-radius:16px;padding:28px;text-align:center;margin-bottom:32px;">
-          <i data-lucide="${tierIcon}" style="width:32px;height:32px;margin-bottom:12px;"></i>
-          <div style="font-size:22px;font-weight:800;letter-spacing:1px;">${tier}</div>
-          <div style="opacity:0.85;margin-top:8px;font-size:15px;">Estimated monthly leak: $${estLeak.toLocaleString()}</div>
-        </div>
-        
-        <!-- Section breakdown -->
-        <div style="background:var(--bg-white);border-radius:16px;padding:28px;margin-bottom:24px;border:1px solid var(--color-border);">
-          <div style="font-weight:700;color:var(--text-charcoal);margin-bottom:20px;font-size:16px;">Your Breakdown</div>
-          ${sectionsHTML}
-        </div>
-        
-        <!-- Tier copy -->
-        <div style="background:var(--bg-white);border-radius:16px;padding:28px;margin-bottom:24px;border:1px solid var(--color-border);">
-          <p style="color:var(--text-charcoal);line-height:1.7;font-size:15px;margin:0;">${tierCopy}</p>
-        </div>
-        
-        <!-- Action card -->
-        <div style="background:${tierBg};border-radius:16px;padding:28px;margin-bottom:32px;">
-          <div style="color:${tierText};font-size:20px;font-weight:800;margin-bottom:8px;">What’s your next move?</div>
-          <div style="color:${tierText};opacity:0.8;font-size:14px;line-height:1.6;">Get a 30-minute Revenue Recovery Call — no pitch, just a clear plan.</div>
-          ${tierCTAHtml}
-        </div>
-        
-        <!-- Retake -->
-        <div style="text-align:center;margin-bottom:16px;">
-          <button id="btn-retake" style="background:none;border:1.5px solid var(--text-charcoal);color:var(--text-charcoal);padding:12px 28px;border-radius:999px;cursor:pointer;font-size:14px;opacity:0.6;font-weight:600;">Retake the Audit</button>
+
+          <!-- Deep Dive & Insight Analysis -->
+          <div class="bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 sm:p-8 shadow-sm w-full mb-8">
+            <h3 class="font-serif font-bold text-xl text-[#1C1C1A] dark:text-[#F5F2EC] mb-3">Our Analysis</h3>
+            <p class="font-sans text-sm sm:text-base text-[#1C1C1A]/70 dark:text-[#F5F2EC]/70 leading-relaxed">
+              ${tierCopy}
+            </p>
+          </div>
+
+          <!-- Action Card / Next Move -->
+          <div class="bg-[#1A9080]/10 dark:bg-[#1A9080]/15 border border-[#1A9080]/30 rounded-2xl p-6 sm:p-8 w-full mb-10">
+            <div class="flex items-start gap-4">
+              <div class="p-3 bg-[#1A9080]/10 rounded-xl text-[#1A9080]">
+                <i data-lucide="compass" class="w-6 h-6"></i>
+              </div>
+              <div>
+                <h4 class="font-serif font-bold text-lg text-[#1C1C1A] dark:text-[#F5F2EC] mb-1">Recommended Next Action</h4>
+                <p class="font-sans text-sm text-[#1C1C1A]/70 dark:text-[#F5F2EC]/70 leading-relaxed mb-6">
+                  To help plug these gaps, we recommend scheduling a 30-minute diagnostic session with our team. We'll outline a clear plan to install these systems in your Melbourne trade operation.
+                </p>
+                ${tierCTAHtml}
+              </div>
+            </div>
+          </div>
+
+          <!-- Retake Button -->
+          <div class="text-center w-full">
+            <button id="btn-retake" class="px-8 py-3.5 border border-[#1C1C1A]/20 dark:border-[#F5F2EC]/20 rounded-full text-sm font-sans font-bold text-[#1C1C1A] dark:text-[#F5F2EC] hover:bg-[#1C1C1A]/5 dark:hover:bg-[#F5F2EC]/5 transition-all cursor-pointer">
+              Retake the Revenue Audit
+            </button>
+          </div>
+
         </div>
       `;
     }
@@ -760,6 +903,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function clearAuditState() {
     selectedPoints = new Array(12).fill(null);
     selectedIndices = new Array(12).fill(null);
+    answers = new Array(12).fill(null);
     currentQ = 0;
     totalScore = 0;
     localStorage.removeItem('stratapult_audit');
@@ -768,7 +912,7 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveSessionState() {
     localStorage.setItem(
       'stratapult_audit',
-      JSON.stringify({ answers: selectedIndices, points: selectedPoints, currentQ })
+      JSON.stringify({ answers: selectedIndices, points: selectedPoints, currentQ, answersObject: answers })
     );
   }
 
@@ -783,11 +927,29 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  function initMenu() {
+  function initNavbarAndMenu() {
+    const navbar = document.getElementById("navbar");
     const trigger = document.getElementById("mobile-menu-trigger");
     const closeBtn = document.getElementById("mobile-menu-close");
     const drawer = document.getElementById("mobile-drawer");
 
+    // Scroll listener
+    let isSystemsOpen = false;
+    let isResourcesOpen = false;
+
+    function updateNavbarStyles() {
+      if (!navbar) return;
+      const isScrolled = window.scrollY > 50;
+      if (isScrolled || isSystemsOpen || isResourcesOpen) {
+        navbar.className = "fixed top-0 left-0 right-0 z-50 h-[72px] transition-all duration-300 bg-[#F5F2EC]/92 dark:bg-[#141412]/92 backdrop-blur-md border-b border-[#1C1C1A]/10 dark:border-[#2E2E2C]";
+      } else {
+        navbar.className = "fixed top-0 left-0 right-0 z-50 h-[72px] transition-all duration-300 bg-transparent border-b border-transparent";
+      }
+    }
+
+    window.addEventListener("scroll", updateNavbarStyles, { passive: true });
+
+    // Mobile Drawer
     trigger?.addEventListener("click", () => {
       drawer?.classList.remove("translate-x-full");
       drawer?.classList.add("translate-x-0");
@@ -798,12 +960,230 @@ document.addEventListener('DOMContentLoaded', () => {
       drawer?.classList.add("translate-x-full");
     });
 
+    // Close mobile drawer on link clicks
     const drawerLinks = drawer?.querySelectorAll("a");
     drawerLinks?.forEach(link => {
-      link.addEventListener("click", () => {
-        drawer?.classList.remove("translate-x-0");
-        drawer?.classList.add("translate-x-full");
+      if (!link.classList.contains('coming-soon-btn') && link.id !== 'mobile-accordion-trigger') {
+        link.addEventListener("click", () => {
+          drawer?.classList.remove("translate-x-0");
+          drawer?.classList.add("translate-x-full");
+        });
+      }
+    });
+
+    // Desktop Mega Menu Logic
+    const itemSystems = document.getElementById("nav-item-systems");
+    const menuSystems = document.getElementById("mega-menu-systems");
+    const underlineSystems = document.getElementById("underline-systems");
+
+    const itemResources = document.getElementById("nav-item-resources");
+    const menuResources = document.getElementById("mega-menu-resources");
+    const underlineResources = document.getElementById("underline-resources");
+
+    const backdrop = document.getElementById("mega-menu-backdrop");
+
+    let systemsTimeout: any = null;
+    let resourcesTimeout: any = null;
+
+    function showSystems() {
+      if (systemsTimeout) clearTimeout(systemsTimeout);
+      if (resourcesTimeout) clearTimeout(resourcesTimeout);
+
+      // Hide resources first
+      hideResourcesInstant();
+
+      isSystemsOpen = true;
+      updateNavbarStyles();
+
+      if (menuSystems) {
+        menuSystems.style.pointerEvents = "auto";
+        menuSystems.classList.remove("hidden", "opacity-0", "-translate-y-2");
+        // Force reflow
+        void menuSystems.offsetHeight;
+        menuSystems.classList.add("opacity-100", "translate-y-0");
+      }
+      if (underlineSystems) {
+        underlineSystems.classList.remove("scale-x-0");
+        underlineSystems.classList.add("scale-x-100");
+      }
+      if (backdrop) {
+        backdrop.classList.remove("hidden", "opacity-0", "pointer-events-none");
+        void backdrop.offsetHeight;
+        backdrop.classList.add("opacity-100", "pointer-events-auto");
+      }
+    }
+
+    function hideSystems() {
+      systemsTimeout = setTimeout(() => {
+        isSystemsOpen = false;
+        updateNavbarStyles();
+
+        if (menuSystems) {
+          menuSystems.style.pointerEvents = "none";
+          menuSystems.classList.remove("opacity-100", "translate-y-0");
+          menuSystems.classList.add("opacity-0", "-translate-y-2");
+          // Delayed hidden
+          setTimeout(() => {
+            if (!isSystemsOpen) menuSystems.classList.add("hidden");
+          }, 300);
+        }
+        if (underlineSystems) {
+          underlineSystems.classList.remove("scale-x-100");
+          underlineSystems.classList.add("scale-x-0");
+        }
+        if (backdrop) {
+          backdrop.classList.remove("opacity-100", "pointer-events-auto");
+          backdrop.classList.add("opacity-0", "pointer-events-none");
+          setTimeout(() => {
+            if (!isSystemsOpen && !isResourcesOpen) backdrop.classList.add("hidden");
+          }, 300);
+        }
+      }, 150);
+    }
+
+    function hideSystemsInstant() {
+      isSystemsOpen = false;
+      if (menuSystems) {
+        menuSystems.style.pointerEvents = "none";
+        menuSystems.classList.remove("opacity-100", "translate-y-0");
+        menuSystems.classList.add("opacity-0", "-translate-y-2", "hidden");
+      }
+      if (underlineSystems) {
+        underlineSystems.classList.remove("scale-x-100");
+        underlineSystems.classList.add("scale-x-0");
+      }
+    }
+
+    function showResources() {
+      if (resourcesTimeout) clearTimeout(resourcesTimeout);
+      if (systemsTimeout) clearTimeout(systemsTimeout);
+
+      // Hide systems first
+      hideSystemsInstant();
+
+      isResourcesOpen = true;
+      updateNavbarStyles();
+
+      if (menuResources) {
+        menuResources.style.pointerEvents = "auto";
+        menuResources.classList.remove("hidden", "opacity-0", "-translate-y-2");
+        void menuResources.offsetHeight;
+        menuResources.classList.add("opacity-100", "translate-y-0");
+      }
+      if (underlineResources) {
+        underlineResources.classList.remove("scale-x-0");
+        underlineResources.classList.add("scale-x-100");
+      }
+      if (backdrop) {
+        backdrop.classList.remove("hidden", "opacity-0", "pointer-events-none");
+        void backdrop.offsetHeight;
+        backdrop.classList.add("opacity-100", "pointer-events-auto");
+      }
+    }
+
+    function hideResources() {
+      resourcesTimeout = setTimeout(() => {
+        isResourcesOpen = false;
+        updateNavbarStyles();
+
+        if (menuResources) {
+          menuResources.style.pointerEvents = "none";
+          menuResources.classList.remove("opacity-100", "translate-y-0");
+          menuResources.classList.add("opacity-0", "-translate-y-2");
+          setTimeout(() => {
+            if (!isResourcesOpen) menuResources.classList.add("hidden");
+          }, 300);
+        }
+        if (underlineResources) {
+          underlineResources.classList.remove("scale-x-100");
+          underlineResources.classList.add("scale-x-0");
+        }
+        if (backdrop) {
+          backdrop.classList.remove("opacity-100", "pointer-events-auto");
+          backdrop.classList.add("opacity-0", "pointer-events-none");
+          setTimeout(() => {
+            if (!isSystemsOpen && !isResourcesOpen) backdrop.classList.add("hidden");
+          }, 300);
+        }
+      }, 150);
+    }
+
+    function hideResourcesInstant() {
+      isResourcesOpen = false;
+      if (menuResources) {
+        menuResources.style.pointerEvents = "none";
+        menuResources.classList.remove("opacity-100", "translate-y-0");
+        menuResources.classList.add("opacity-0", "-translate-y-2", "hidden");
+      }
+      if (underlineResources) {
+        underlineResources.classList.remove("scale-x-100");
+        underlineResources.classList.add("scale-x-0");
+      }
+    }
+
+    // Attach desktop hover events
+    itemSystems?.addEventListener("mouseenter", showSystems);
+    itemSystems?.addEventListener("mouseleave", hideSystems);
+    menuSystems?.addEventListener("mouseenter", showSystems);
+    menuSystems?.addEventListener("mouseleave", hideSystems);
+
+    itemResources?.addEventListener("mouseenter", showResources);
+    itemResources?.addEventListener("mouseleave", hideResources);
+    menuResources?.addEventListener("mouseenter", showResources);
+    menuResources?.addEventListener("mouseleave", hideResources);
+
+    // Initial check
+    updateNavbarStyles();
+
+    // Coming soon Toast trigger logic
+    const toast = document.getElementById("coming-soon-toast");
+    const toastText = document.getElementById("coming-soon-toast-text");
+    let toastTimeout: any = null;
+
+    function triggerToast(name: string) {
+      if (toastTimeout) clearTimeout(toastTimeout);
+      if (toast && toastText) {
+        toastText.textContent = `${name} is coming soon!`;
+        toast.classList.remove("opacity-0", "translate-y-4", "pointer-events-none");
+        toast.classList.add("opacity-100", "translate-y-0");
+
+        toastTimeout = setTimeout(() => {
+          toast.classList.remove("opacity-100", "translate-y-0");
+          toast.classList.add("opacity-0", "translate-y-4", "pointer-events-none");
+        }, 3000);
+      }
+    }
+
+    // Attach to all coming soon links (both desktop and mobile)
+    document.querySelectorAll(".coming-soon-btn").forEach(btn => {
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        const name = btn.getAttribute("data-name") || "This resource";
+        triggerToast(name);
       });
+    });
+
+    // Mobile Resources Accordion Toggle
+    const mobileAccTrigger = document.getElementById("mobile-accordion-trigger");
+    const mobileAccContent = document.getElementById("mobile-accordion-content");
+    const mobileAccChevron = document.getElementById("mobile-accordion-chevron");
+    let isMobileAccOpen = false;
+
+    mobileAccTrigger?.addEventListener("click", (e) => {
+      e.preventDefault();
+      isMobileAccOpen = !isMobileAccOpen;
+
+      if (mobileAccContent && mobileAccChevron) {
+        if (isMobileAccOpen) {
+          mobileAccContent.classList.remove("max-h-0", "opacity-0");
+          mobileAccContent.classList.add("max-h-[800px]", "opacity-100");
+          mobileAccChevron.style.transform = "rotate(180deg)";
+        } else {
+          mobileAccContent.classList.remove("max-h-[800px]", "opacity-100");
+          mobileAccContent.classList.add("max-h-0", "opacity-0");
+          mobileAccChevron.style.transform = "rotate(0deg)";
+        }
+      }
     });
   }
 
@@ -817,7 +1197,23 @@ document.addEventListener('DOMContentLoaded', () => {
           selectedIndices = session.answers;
           selectedPoints = session.points;
           currentQ = typeof session.currentQ === "number" ? session.currentQ : 0;
-          totalScore = selectedPoints.filter(p => p !== null).reduce((a, b: any) => a + b, 0);
+          
+          if (Array.isArray(session.answersObject)) {
+            answers = session.answersObject;
+          } else {
+            // Reconstruct if not saved
+            answers = new Array(12).fill(null);
+            for (let i = 0; i < 12; i++) {
+              if (selectedIndices[i] !== null) {
+                answers[i] = {
+                  score: 3 - selectedIndices[i]!,
+                  sectionIndex: QUESTIONS[i].sectionIndex
+                };
+              }
+            }
+          }
+
+          const metrics = calculateScores();
 
           if (currentQ >= 12) {
             showState('emailgate');
@@ -842,7 +1238,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 13. BOOTSTRAPPING
   initTheme();
-  initMenu();
+  initNavbarAndMenu();
 
   const startBtn = document.getElementById('start-btn');
   if (startBtn) {
