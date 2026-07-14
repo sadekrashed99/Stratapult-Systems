@@ -172,24 +172,24 @@ document.addEventListener('DOMContentLoaded', () => {
   let totalScore = 0;
 
   // 3. STATE MACHINE
-  function showState(stateName: 'intro' | 'question' | 'emailgate' | 'results') {
-    const intro = document.getElementById('state-intro');
-    const question = document.getElementById('state-question');
-    const emailgate = document.getElementById('state-emailgate');
-    const results = document.getElementById('state-results');
-
-    [intro, question, emailgate, results].forEach(el => {
-      if (el) el.style.display = 'none';
+  function showState(stateName: string) {
+    // Use inline styles — bypasses all CSS class specificity issues
+    ['intro', 'question', 'emailgate', 'email-gate', 'results'].forEach(id => {
+      const el = document.getElementById(`state-${id}`);
+      if (el) {
+        el.style.display = 'none';
+        el.classList.remove('active');
+      }
     });
 
-    let target = null;
-    if (stateName === 'intro') target = intro;
-    else if (stateName === 'question') target = question;
-    else if (stateName === 'emailgate') target = emailgate;
-    else if (stateName === 'results') target = results;
-
+    const target = document.getElementById(`state-${stateName}`);
     if (target) {
       target.style.display = 'block';
+      target.style.visibility = 'visible';
+      target.style.opacity = '1';
+      console.log(`showState: showing #state-${stateName}`);
+    } else {
+      console.error(`showState: #state-${stateName} NOT FOUND in DOM`);
     }
 
     if (typeof (window as any).lucide !== 'undefined') {
