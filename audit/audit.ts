@@ -22,7 +22,7 @@ const QUESTIONS: Question[] = [
       section: 'GETTING FOUND',
       icon: 'search',
       sectionIndex: 1,
-      question: 'When someone Googles “emergency [your trade] Melbourne” right now, where do you show up?',
+      question: 'When someone Googles “[your trade] Melbourne” right now, where do you show up?',
       options: [
         { text: 'Top 3 results — paid ad or organic', pts: 3 },
         { text: 'Page 1, but not in the top 3', pts: 2 },
@@ -34,10 +34,10 @@ const QUESTIONS: Question[] = [
       section: 'GETTING FOUND',
       icon: 'search',
       sectionIndex: 1,
-      question: 'What happens when someone visits your website at 11pm on a Saturday?',
+      question: 'What happens when someone visits your website after hours or on weekends?',
       options: [
         { text: 'They can book instantly or get an auto-response within minutes', pts: 3 },
-        { text: 'They can fill out a form — I’ll follow up Monday', pts: 1 },
+        { text: 'They can fill out a form — I’ll follow up next business day', pts: 1 },
         { text: 'They see my number and can call — that’s it', pts: 1 },
         { text: 'I don’t really have a proper website', pts: 0 }
       ]
@@ -159,6 +159,18 @@ const QUESTIONS: Question[] = [
         { text: 'I ask happy customers to tell their mates', pts: 1 },
         { text: 'Referrals just happen naturally — no system', pts: 0 }
       ]
+    },
+    {
+      section: 'TOP PRIORITY',
+      icon: 'target',
+      sectionIndex: 5,
+      question: 'What is your top priority goal right now?',
+      options: [
+        { text: 'Be the first call when someone needs your service', pts: 0 },
+        { text: 'Stop losing leads to competitors who respond faster', pts: 0 },
+        { text: 'Turn one-time customers into repeat business', pts: 0 },
+        { text: 'Charge what I’m worth without losing jobs', pts: 0 }
+      ]
     }
   ];
 
@@ -171,10 +183,91 @@ document.addEventListener('DOMContentLoaded', () => {
     sectionIndex: number;
   }
   let currentQ = 0;
-  let selectedPoints: (number | null)[] = new Array(12).fill(null);
-  let selectedIndices: (number | null)[] = new Array(12).fill(null);
-  let answers: (Answer | null)[] = new Array(12).fill(null);
+  let selectedPoints: (number | null)[] = new Array(13).fill(null);
+  let selectedIndices: (number | null)[] = new Array(13).fill(null);
+  let answers: (Answer | null)[] = new Array(13).fill(null);
   let totalScore = 0;
+  let detectedSuburb = '';
+  let insightTimer: any = null;
+  let advanceTimer: any = null;
+
+  const microInsights: Record<number, { low: string; mid: string; high: string }> = {
+    0: {
+      low: "Most businesses in this position lose 70% of potential inbound clicks to competitors listed in the top three local results.",
+      mid: "You are ahead of many, but top-three listings capture over 60% of all search volume, leaving only a fraction for lower rankings.",
+      high: "Strong ranking. Businesses that secure top-three visibility consistently capture the highest volume of high-intent search inquiries before prospects scroll down."
+    },
+    1: {
+      low: "This is the #1 reason websites fail to convert traffic, as prospects search for an immediate solution and quickly move to another business.",
+      mid: "You are ahead of many, but a delay of several hours gives competitors a window to convert the customer first.",
+      high: "Strong setup. Businesses that offer instant engagement see up to a 4x increase in conversion rates from after-hours traffic."
+    },
+    2: {
+      low: "Most businesses in this position lose over half their local leads, as modern buyers look for substantial social proof to establish trust.",
+      mid: "You are ahead of many, but the gap between good and great here is social proof density that outshines nearby competitors.",
+      high: "Strong reputation. Businesses with a high volume of positive ratings convert prospects much easier and can command premium rates."
+    },
+    3: {
+      low: "This is the #1 reason businesses waste capital on marketing. Untracked ad campaigns often lead to unprofitable acquisition costs.",
+      mid: "You are ahead of many, but tracking ROI precisely is what prevents ad spend from becoming a costly guessing game.",
+      high: "Strong precision. Businesses with tracked ROI can confidently scale their budgets because they know exactly how much profit each dollar generates."
+    },
+    4: {
+      low: "This is the #1 reason enquiries go cold. Inbound leads are 21 times more likely to convert if contacted within five minutes.",
+      mid: "You are ahead of many, but responding within minutes rather than an hour secures the customer before they contact a competitor.",
+      high: "Strong speed. Businesses that consistently respond within five minutes win the vast majority of jobs they compete for."
+    },
+    5: {
+      low: "Most businesses lose up to 62% of inbound calls to voicemail. Prospects rarely wait and will call the next competitor immediately.",
+      mid: "You are ahead of many, but manual call-backs leave a gap where competitors can engage and win the prospect first.",
+      high: "Strong response. Immediate automated text replies salvage missed calls, instantly starting a conversation and stopping the prospect from searching further."
+    },
+    6: {
+      low: "This is the #1 reason businesses suffer from unpredictable booking cycles, as single-source models are highly vulnerable to market changes.",
+      mid: "You are ahead of many, but relying on just two channels limits your growth and exposes you to algorithm or platform changes.",
+      high: "Strong foundation. Diversified acquisition channels ensure consistent job flow and shield your pipeline from seasonal or market fluctuations."
+    },
+    7: {
+      low: "Most businesses with low win rates lose thousands annually to unpaid estimating hours, highlighting a clear leak in their sales presentation.",
+      mid: "You are ahead of many, but moving beyond a 50% conversion rate usually requires a structured follow-up system.",
+      high: "Strong conversion. A win rate above 70% indicates high pricing confidence and exceptional alignment between your offer and the customer's expectations."
+    },
+    8: {
+      low: "Most businesses lose 30% to 40% of their open quotes simply by never following up, leaving easy revenue on the table.",
+      mid: "You are ahead of many, but consistent automated sequences ensure no prospect slips through the cracks during busy periods.",
+      high: "Strong process. Multi-touch automated follow-ups recover an average of 25% of quotes that would otherwise go unanswered."
+    },
+    9: {
+      low: "Most businesses struggle with profitability because they don't know this metric, making it impossible to optimize services for higher margins.",
+      mid: "You are ahead of many, but actively optimizing package options or upsells is the fastest way to raise profit margins.",
+      high: "Strong metrics. Managing average job value allows you to generate significantly more revenue from the exact same volume of bookings."
+    },
+    10: {
+      low: "This is the #1 reason businesses lack reviews. Manual systems fail over time because the process relies on constant manual effort.",
+      mid: "You are ahead of many, but automated requests on job completion yield three times more feedback with zero ongoing effort.",
+      high: "Strong mechanism. Automated review collection builds a compounding marketing asset that continually drives organic customer acquisition."
+    },
+    11: {
+      low: "Most businesses in this position miss out on high-value repeat work by failing to systematically incentivize their existing networks.",
+      mid: "You are ahead of many, but a formal, structured incentive system produces up to double the referral volume of manual requests.",
+      high: "Strong network effect. Having an incentivized referral system turns happy customers into an active sales force, lowering customer acquisition costs."
+    }
+  };
+
+  async function fetchGeoLocation() {
+    try {
+      const res = await fetch('https://ipapi.co/json/');
+      const data = await res.json();
+      if (data && data.city) {
+        detectedSuburb = data.city;
+        const suburbInput = document.getElementById('suburb') as HTMLInputElement;
+        if (suburbInput) {
+          suburbInput.value = detectedSuburb;
+        }
+      }
+    } catch (_) {}
+  }
+  fetchGeoLocation();
 
   function calculateScores() {
     let sum = 0;
@@ -290,6 +383,15 @@ document.addEventListener('DOMContentLoaded', () => {
   function renderQuestion(index: number) {
     console.log('renderQuestion → target el:', document.getElementById('state-question'), '| q:', QUESTIONS[index]);
 
+    if (insightTimer) {
+      clearTimeout(insightTimer);
+      insightTimer = null;
+    }
+    if (advanceTimer) {
+      clearTimeout(advanceTimer);
+      advanceTimer = null;
+    }
+
     if (!QUESTIONS || !QUESTIONS.length) {
       document.getElementById('state-question').innerHTML = 
         '<p style="color:red;padding:40px">ERROR: QUESTIONS array is empty or undefined</p>';
@@ -298,13 +400,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     try {
       const q = QUESTIONS[index];
-      const progressPct = Math.round((index / 12) * 100);
+      const progressPct = Math.round((index / QUESTIONS.length) * 100);
       
       const optionsHTML = q.options.map((opt, i) => {
         const isSelected = selectedIndices[index] === i;
         const cardClass = isSelected 
           ? 'border-1.5 border-[#1A9080] bg-[rgba(26,144,128,0.08)] dark:bg-[rgba(26,144,128,0.15)] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option option-card selected' 
-          : 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option option-card';
+          : 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option option-card';
         
         const circleClass = isSelected 
           ? 'w-5 h-5 rounded-full bg-[#1A9080] flex items-center justify-center shrink-0 text-white radio-circle' 
@@ -331,7 +433,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <span id="section-label" class="font-sans font-bold text-[13px] tracking-[1.5px] uppercase">${q.section}</span>
               </div>
               <span class="font-sans text-[14px] text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 font-medium" id="question-counter">
-                Question <span class="font-bold text-[#1C1C1A] dark:text-[#F5F2EC]">${index + 1}</span> of 12
+                Question <span class="font-bold text-[#1C1C1A] dark:text-[#F5F2EC]">${index + 1}</span> of ${QUESTIONS.length}
               </span>
             </div>
             <div class="w-full h-[6px] bg-[#E8E5DF] dark:bg-[#2E2E2C] rounded-full overflow-hidden">
@@ -357,6 +459,8 @@ document.addEventListener('DOMContentLoaded', () => {
                   <div id="answers-container" class="flex flex-col gap-3.5">
                     ${optionsHTML}
                   </div>
+                  <!-- Container for micro-insight -->
+                  <div id="micro-insight-wrapper" class="w-full"></div>
                 </div>
   
                 <!-- Actions Footer inside card -->
@@ -413,7 +517,7 @@ document.addEventListener('DOMContentLoaded', () => {
           if (!option) return;
           
           container.querySelectorAll('.answer-option').forEach(el => {
-            el.className = 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer hover:border-[#1A9080]/50 transition-all duration-150 select-none answer-option option-card';
+            el.className = 'border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-xl p-4.5 flex items-center gap-4 cursor-pointer transition-all duration-150 select-none answer-option option-card';
             const circle = el.querySelector('.radio-circle');
             if (circle) {
               circle.className = 'w-5 h-5 rounded-full border-1.5 border-[#1C1C1A]/30 dark:border-white/30 flex items-center justify-center shrink-0 transition-all duration-150 radio-circle';
@@ -447,6 +551,59 @@ document.addEventListener('DOMContentLoaded', () => {
           
           const nextBtn = document.getElementById('next-btn');
           if (nextBtn) nextBtn.style.display = 'flex';
+
+          // Clear any active timers first
+          if (insightTimer) {
+            clearTimeout(insightTimer);
+            insightTimer = null;
+          }
+          if (advanceTimer) {
+            clearTimeout(advanceTimer);
+            advanceTimer = null;
+          }
+
+          if (currentQ < 12) {
+            const wrapper = document.getElementById('micro-insight-wrapper');
+            if (wrapper) {
+              wrapper.innerHTML = ''; // instantly clear any stale micro-insight
+            }
+            
+            // 300ms delay before fade-in
+            insightTimer = setTimeout(() => {
+              const pts = score;
+              let tier: 'low' | 'mid' | 'high' = 'mid';
+              if (pts === 0) {
+                tier = 'low';
+              } else if (pts === 3) {
+                tier = 'high';
+              }
+              const text = microInsights[currentQ][tier];
+              if (wrapper) {
+                wrapper.innerHTML = `
+                  <div id="micro-insight" class="mt-5 border-l-[3px] border-[#1A9080] bg-[rgba(26,144,128,0.06)] dark:bg-[rgba(26,144,128,0.12)] p-[10px_14px] rounded-r-xl text-[13px] text-[#1C1C1A]/85 dark:text-[#F5F2EC]/85 font-sans leading-relaxed flex items-start gap-2.5 max-w-full animate-insight-slide-up">
+                    <span class="text-[#1A9080] shrink-0">📊</span>
+                    <span>${text}</span>
+                  </div>
+                `;
+              }
+            }, 300);
+
+            // Stays visible for 1.4 seconds before auto-advancing, so 300ms + 1400ms = 1700ms total
+            advanceTimer = setTimeout(() => {
+              const isSectionEnd = [3, 6, 9].includes(currentQ);
+              if (isSectionEnd) {
+                showSectionTransition(currentQ + 1, function() {
+                  currentQ++;
+                  renderQuestion(currentQ);
+                  showState('question');
+                });
+              } else {
+                currentQ++;
+                renderQuestion(currentQ);
+                showState('question');
+              }
+            }, 1700);
+          }
         });
       }
       
@@ -454,12 +611,22 @@ document.addEventListener('DOMContentLoaded', () => {
       const nextBtn = document.getElementById('next-btn');
       if (nextBtn) {
         nextBtn.addEventListener('click', function() {
-          const isLastQ = currentQ === 11;
+          if (insightTimer) {
+            clearTimeout(insightTimer);
+            insightTimer = null;
+          }
+          if (advanceTimer) {
+            clearTimeout(advanceTimer);
+            advanceTimer = null;
+          }
+          const isLastQ = currentQ === 12;
           const isSectionEnd = [3, 6, 9].includes(currentQ);
           
           if (isLastQ) {
-            showState('emailgate');
-            attachEmailGateListeners();
+            currentQ++;
+            saveSessionState();
+            renderResults();
+            showState('results');
           } else if (isSectionEnd) {
             showSectionTransition(currentQ + 1, function() {
               currentQ++;
@@ -478,6 +645,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const backBtn = document.getElementById('back-btn');
       if (backBtn) {
         backBtn.addEventListener('click', function() {
+          if (insightTimer) {
+            clearTimeout(insightTimer);
+            insightTimer = null;
+          }
+          if (advanceTimer) {
+            clearTimeout(advanceTimer);
+            advanceTimer = null;
+          }
           if (currentQ > 0) {
             currentQ--;
             renderQuestion(currentQ);
@@ -576,6 +751,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const email = emailInput?.value?.trim();
       const phone = phoneInput?.value?.trim() || "";
       const tradeType = tradeTypeSelect?.value;
+      const topPriority = (selectedIndices[12] !== null && selectedIndices[12] !== undefined)
+        ? QUESTIONS[12].options[selectedIndices[12]!].text
+        : "";
       const suburb = suburbInput?.value?.trim();
       
       const errName = document.getElementById("error-first-name");
@@ -643,6 +821,7 @@ document.addEventListener('DOMContentLoaded', () => {
             email,
             phone,
             tradeType,
+            topPriority,
             suburb,
             totalScore: totalScoreCalculated,
             leakPercentage: leakPct,
@@ -686,6 +865,50 @@ document.addEventListener('DOMContentLoaded', () => {
     const estimatedMonthlyLeak = Math.round((leakPercentage / 100) * 15000);
     const formattedLeak = '$' + estimatedMonthlyLeak.toLocaleString() + '/month';
     const needleDeg = -90 + (leakPercentage / 100 * 180);
+
+    // Calculate Worst Section Percentage and Priority Tie-Breaking
+    const p1 = s1 / 12;
+    const p2 = s2 / 9;
+    const p3 = s3 / 9;
+    const p4 = s4 / 6;
+
+    let worstPct = p1;
+    let worstSec = 'found';
+
+    if (p2 < worstPct) {
+      worstPct = p2;
+      worstSec = 'capture';
+    }
+    if (p3 < worstPct) {
+      worstPct = p3;
+      worstSec = 'convert';
+    }
+    if (p4 < worstPct) {
+      worstPct = p4;
+      worstSec = 'retain';
+    }
+
+    let leakHeading = '';
+    let leakBody = '';
+    let leakStat = '';
+
+    if (worstSec === 'found') {
+      leakHeading = "You're losing customers before they ever find you";
+      leakBody = "Your biggest leak is at the top of the funnel. Customers searching for your service right now are landing on competitors — not because you're worse, but because you're harder to find. Visibility gaps compound fast: every week this isn't fixed is another week of customers you'll never know you lost.";
+      leakStat = "Businesses in the top 3 local results capture 67% of all clicks. Everyone else splits the remaining 33%.";
+    } else if (worstSec === 'capture') {
+      leakHeading = "Customers are finding you — then slipping away";
+      leakBody = "Your biggest leak is in the handoff between interest and contact. People are reaching your business but not converting into booked enquiries. Slow response windows, missed calls, and no follow-up system are letting warm leads go cold — and straight to a competitor who picks up faster.";
+      leakStat = "Leads contacted within 5 minutes are 21x more likely to convert than those followed up an hour later.";
+    } else if (worstSec === 'convert') {
+      leakHeading = "Your leads are coming in — but too many quotes go quiet";
+      leakBody = "Your biggest leak is in the conversion stage. You're generating enquiries but losing jobs at the quote or follow-up phase. Without a structured system to present, follow up, and close — you're doing unpaid estimation work for competitors who eventually win the job.";
+      leakStat = "The average trade business loses 30–40% of open quotes simply by never following up a second time.";
+    } else {
+      leakHeading = "Your best customers are leaving value on the table";
+      leakBody = "Your biggest leak is in what happens after the job. Happy customers who'd refer you — and hire you again — are going silent because there's no system keeping you top of mind. Retention and referrals are the highest-margin revenue available to any service business. Right now, most of it is going uncaptured.";
+      leakStat = "Businesses with a structured referral system generate up to 2x the referral volume of those who rely on word-of-mouth alone.";
+    }
 
     let tierLabel = '';
     let tierBgClass = '';
@@ -846,6 +1069,24 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+          <!-- Biggest Revenue Leak Diagnosis Block -->
+          <div class="bg-[rgba(232,98,42,0.04)] border-l-4 border-[#E8622A] rounded-r-2xl p-[20px_24px] w-full mb-8 shadow-sm text-left">
+            <span class="text-[11px] font-sans font-bold text-[#E8622A] tracking-[0.1em] uppercase block mb-1.5">
+              YOUR BIGGEST LEAK
+            </span>
+            <h3 class="font-serif font-bold text-xl text-[#1C1C1A] dark:text-[#F5F2EC] mb-2 leading-tight">
+              ${leakHeading}
+            </h3>
+            <p class="font-sans text-sm text-[#1C1C1A]/80 dark:text-[#F5F2EC]/80 leading-relaxed mb-4">
+              ${leakBody}
+            </p>
+            <div class="border-t border-[#E8622A]/20 pt-3">
+              <p class="font-sans text-[13px] italic text-[#1C1C1A]/70 dark:text-[#F5F2EC]/70 leading-normal">
+                — ${leakStat}
+              </p>
+            </div>
+          </div>
+
           <!-- Deep Dive & Insight Analysis -->
           <div class="bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 sm:p-8 shadow-sm w-full mb-8">
             <h3 class="font-serif font-bold text-xl text-[#1C1C1A] dark:text-[#F5F2EC] mb-3">Our Analysis</h3>
@@ -870,6 +1111,104 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
           </div>
 
+          <!-- Subtle Divider -->
+          <div class="w-full border-t border-[#E8E5DF] dark:border-[#2E2E2C] my-8"></div>
+
+          <!-- Personalised Revenue Recovery Section -->
+          <div id="revenue-recovery-card" class="bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 sm:p-8 shadow-sm w-full mb-10 text-left">
+            <div id="post-results-intro" class="mb-6">
+              <h3 class="font-serif font-bold text-xl sm:text-2xl text-[#1C1C1A] dark:text-[#F5F2EC] mb-2">
+                Want your personalised revenue recovery number?
+              </h3>
+              <p class="font-sans text-sm text-[#1C1C1A]/70 dark:text-[#F5F2EC]/70 leading-relaxed">
+                Tell us two things and we'll calculate exactly how much revenue your business is leaking — and send you a free PDF breakdown.
+              </p>
+            </div>
+            
+            <form id="post-results-form" class="flex flex-col gap-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Name -->
+                <div class="flex flex-col md:col-span-2">
+                  <input type="text" id="post-field-name" placeholder="Your first name" class="bg-[#F5F2EC] dark:bg-[#141412] border border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[48px]" required />
+                  <span id="post-error-name" class="text-[#E8622A] text-xs mt-1 hidden">First name is required.</span>
+                </div>
+
+                <!-- Email -->
+                <div class="flex flex-col">
+                  <input type="email" id="post-field-email" placeholder="your@email.com" class="bg-[#F5F2EC] dark:bg-[#141412] border border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[48px]" required />
+                  <span id="post-error-email" class="text-[#E8622A] text-xs mt-1 hidden">Please enter a valid email address.</span>
+                </div>
+
+                <!-- Phone -->
+                <div class="flex flex-col">
+                  <input type="tel" id="post-field-phone" placeholder="04xx xxx xxx" class="bg-[#F5F2EC] dark:bg-[#141412] border border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[48px]" required />
+                  <span id="post-error-phone" class="text-[#E8622A] text-xs mt-1 hidden">Phone number is required.</span>
+                </div>
+
+                <!-- Suburb -->
+                <div class="flex flex-col md:col-span-2">
+                  <label for="suburb" class="block text-[11px] font-bold font-sans text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 uppercase tracking-[1px] mb-1.5">Your suburb or city</label>
+                  <input type="text" id="suburb" name="suburb" value="${detectedSuburb}" placeholder="e.g. Richmond" class="bg-[#F5F2EC] dark:bg-[#141412] border border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[48px]" />
+                </div>
+
+                <!-- Average Job Value -->
+                <div class="flex flex-col">
+                  <label for="post-field-avg-job-value" class="block text-[11px] font-bold font-sans text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 uppercase tracking-[1px] mb-1.5">What's your average job value?</label>
+                  <select id="post-field-avg-job-value" class="bg-[#F5F2EC] dark:bg-[#141412] border border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3 font-sans focus:outline-none focus:border-[#1A9080] transition-colors h-[48px] cursor-pointer" required>
+                    <option value="" disabled selected>Select average job value</option>
+                    <option value="200">Under $300</option>
+                    <option value="450">$300 – $600</option>
+                    <option value="1050">$600 – $1,500</option>
+                    <option value="3250">$1,500 – $5,000</option>
+                    <option value="7500">$5,000+</option>
+                  </select>
+                  <span id="post-error-avg-job-value" class="text-[#E8622A] text-xs mt-1 hidden">Average job value is required.</span>
+                </div>
+
+                <!-- Jobs Per Month -->
+                <div class="flex flex-col">
+                  <label for="post-field-jobs-per-month" class="block text-[11px] font-bold font-sans text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 uppercase tracking-[1px] mb-1.5">How many jobs do you complete per month?</label>
+                  <select id="post-field-jobs-per-month" class="bg-[#F5F2EC] dark:bg-[#141412] border border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3 font-sans focus:outline-none focus:border-[#1A9080] transition-colors h-[48px] cursor-pointer" required>
+                    <option value="" disabled selected>Select jobs completed per month</option>
+                    <option value="6">1 – 10 jobs</option>
+                    <option value="15">10 – 20 jobs</option>
+                    <option value="30">20 – 40 jobs</option>
+                    <option value="50">40+ jobs</option>
+                  </select>
+                  <span id="post-error-jobs-per-month" class="text-[#E8622A] text-xs mt-1 hidden">Jobs completed per month is required.</span>
+                </div>
+              </div>
+
+              <!-- Submit Button -->
+              <div class="mt-2 flex flex-col sm:flex-row items-center gap-4">
+                <button type="submit" id="post-btn-submit" class="bg-[#E8622A] hover:bg-[#ff763d] text-white font-sans font-bold text-sm py-3 px-6 rounded-full w-full sm:w-auto transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2 shadow-md shadow-[#E8622A]/10 cursor-pointer">
+                  <div id="post-spinner" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin hidden"></div>
+                  <span id="post-btn-text">Calculate My Revenue Leak →</span>
+                </button>
+                <div class="flex items-center gap-1.5 text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 text-[11px] font-sans">
+                  <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                  <span>No spam. Your data is secure.</span>
+                </div>
+              </div>
+            </form>
+
+            <!-- Results Reveal Card (Hidden by default) -->
+            <div id="post-results-reveal" class="hidden flex-col items-center text-center py-4 px-2 sm:px-6 animate-fade-slide-up">
+              <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-xs font-bold font-sans tracking-[2px] uppercase mb-3 block">
+                YOUR ESTIMATED MONTHLY REVENUE LEAK
+              </span>
+              <div id="reveal-dollar-amount" class="text-[#E8622A] font-display font-black text-[42px] sm:text-[56px] md:text-[64px] tracking-tight mb-4 leading-none">
+                $0 / month
+              </div>
+              <p class="font-sans text-sm sm:text-base text-[#1C1C1A]/70 dark:text-[#F5F2EC]/70 max-w-lg mx-auto mb-8 leading-relaxed">
+                Based on your audit score and business volume, this is how much revenue your business is likely losing every single month to gaps in visibility, lead capture, and conversion.
+              </p>
+              <a href="#" class="bg-[#E8622A] hover:bg-[#ff763d] text-white font-sans font-bold text-base py-4 px-8 rounded-full w-full max-w-md transition-all duration-200 hover:scale-[1.02] inline-flex items-center justify-center gap-2 shadow-lg shadow-[#E8622A]/20 cursor-pointer">
+                Book a Free Strategy Call &rarr;
+              </a>
+            </div>
+          </div>
+
           <!-- Retake Button -->
           <div class="text-center w-full">
             <button id="btn-retake" class="px-8 py-3.5 border border-[#1C1C1A]/20 dark:border-[#F5F2EC]/20 rounded-full text-sm font-sans font-bold text-[#1C1C1A] dark:text-[#F5F2EC] hover:bg-[#1C1C1A]/5 dark:hover:bg-[#F5F2EC]/5 transition-all cursor-pointer">
@@ -881,6 +1220,149 @@ document.addEventListener('DOMContentLoaded', () => {
       `;
     }
     
+    const postForm = document.getElementById('post-results-form');
+    if (postForm) {
+      postForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const nameInput = document.getElementById('post-field-name') as HTMLInputElement;
+        const emailInput = document.getElementById('post-field-email') as HTMLInputElement;
+        const phoneInput = document.getElementById('post-field-phone') as HTMLInputElement;
+        const suburbInput = document.getElementById('suburb') as HTMLInputElement;
+        const avgJobValueSelect = document.getElementById('post-field-avg-job-value') as HTMLSelectElement;
+        const jobsPerMonthSelect = document.getElementById('post-field-jobs-per-month') as HTMLSelectElement;
+        
+        const firstName = nameInput?.value?.trim();
+        const email = emailInput?.value?.trim();
+        const phone = phoneInput?.value?.trim() || "";
+        const suburb = suburbInput?.value?.trim() || "";
+        const avgJobValueVal = avgJobValueSelect?.value;
+        const jobsPerMonthVal = jobsPerMonthSelect?.value;
+        
+        const errName = document.getElementById("post-error-name");
+        const errEmail = document.getElementById("post-error-email");
+        const errPhone = document.getElementById("post-error-phone");
+        const errAvgJobValue = document.getElementById("post-error-avg-job-value");
+        const errJobsPerMonth = document.getElementById("post-error-jobs-per-month");
+        
+        if (errName) errName.style.display = 'none';
+        if (errEmail) errEmail.style.display = 'none';
+        if (errPhone) errPhone.style.display = 'none';
+        if (errAvgJobValue) errAvgJobValue.style.display = 'none';
+        if (errJobsPerMonth) errJobsPerMonth.style.display = 'none';
+        
+        let valid = true;
+        if (!firstName) {
+          if (errName) errName.style.display = 'block';
+          valid = false;
+        }
+        if (!email || !/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+          if (errEmail) errEmail.style.display = 'block';
+          valid = false;
+        }
+        if (!phone) {
+          if (errPhone) errPhone.style.display = 'block';
+          valid = false;
+        }
+        if (!avgJobValueVal) {
+          if (errAvgJobValue) errAvgJobValue.style.display = 'block';
+          valid = false;
+        }
+        if (!jobsPerMonthVal) {
+          if (errJobsPerMonth) errJobsPerMonth.style.display = 'block';
+          valid = false;
+        }
+        
+        if (!valid) return;
+        
+        const btn = document.getElementById('post-btn-submit') as HTMLButtonElement;
+        const spinner = document.getElementById('post-spinner');
+        const btnText = document.getElementById('post-btn-text');
+        
+        if (spinner) spinner.style.display = 'block';
+        if (btnText) btnText.textContent = 'Calculating...';
+        if (btn) btn.disabled = true;
+        
+        // Calculate scores from answers
+        let marketingScore = 0;
+        let leadCaptureScore = 0;
+        let pricingScore = 0;
+        let retentionScore = 0;
+        
+        for (let i = 0; i < 12; i++) {
+          const ans = answers[i];
+          if (ans) {
+            if (ans.sectionIndex === 1) marketingScore += ans.score;
+            else if (ans.sectionIndex === 2) leadCaptureScore += ans.score;
+            else if (ans.sectionIndex === 3) pricingScore += ans.score;
+            else if (ans.sectionIndex === 4) retentionScore += ans.score;
+          }
+        }
+        
+        const totalScoreCalculated = marketingScore + leadCaptureScore + pricingScore + retentionScore;
+        const leakPct = Math.round(((36 - totalScoreCalculated) / 36) * 100);
+        
+        const aovMidpoint = parseInt(avgJobValueVal, 10);
+        const jobsMidpoint = parseInt(jobsPerMonthVal, 10);
+        const monthlyRevenue = aovMidpoint * jobsMidpoint;
+        const personalisedMonthlyLeak = Math.round((leakPct / 100) * monthlyRevenue);
+        
+        const topPriority = (selectedIndices[12] !== null && selectedIndices[12] !== undefined)
+          ? QUESTIONS[12].options[selectedIndices[12]!].text
+          : "";
+          
+        const tradeType = (selectedIndices[0] !== null && selectedIndices[0] !== undefined)
+          ? QUESTIONS[0].options[selectedIndices[0]!].text
+          : "";
+          
+        try {
+          await fetch(GHL_WEBHOOK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              firstName,
+              email,
+              phone,
+              tradeType,
+              suburb,
+              totalScore: totalScoreCalculated,
+              leakPercentage: leakPct,
+              marketingScore,
+              leadCaptureScore,
+              pricingScore,
+              retentionScore,
+              topPriority,
+              avgJobValue: aovMidpoint,
+              monthlyJobs: jobsMidpoint,
+              monthlyRevenue,
+              personalisedMonthlyLeak
+            })
+          });
+        } catch (err) {
+          console.log('Webhook error (non-blocking):', err);
+        } finally {
+          if (spinner) spinner.style.display = 'none';
+          if (btnText) btnText.textContent = 'Calculated!';
+          
+          // Hide intro and form
+          const introEl = document.getElementById('post-results-intro');
+          if (introEl) introEl.classList.add('hidden');
+          if (postForm) postForm.classList.add('hidden');
+          
+          // Show the reveal card with the calculated value
+          const revealEl = document.getElementById('post-results-reveal');
+          if (revealEl) {
+            const amountEl = document.getElementById('reveal-dollar-amount');
+            if (amountEl) {
+              amountEl.textContent = `$${personalisedMonthlyLeak.toLocaleString()} / month`;
+            }
+            revealEl.classList.remove('hidden');
+            revealEl.style.display = 'flex';
+          }
+        }
+      });
+    }
+
     const retakeBtn = document.getElementById('btn-retake');
     if (retakeBtn) {
       retakeBtn.addEventListener('click', function() {
@@ -901,9 +1383,9 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function clearAuditState() {
-    selectedPoints = new Array(12).fill(null);
-    selectedIndices = new Array(12).fill(null);
-    answers = new Array(12).fill(null);
+    selectedPoints = new Array(13).fill(null);
+    selectedIndices = new Array(13).fill(null);
+    answers = new Array(13).fill(null);
     currentQ = 0;
     totalScore = 0;
     localStorage.removeItem('stratapult_audit');
@@ -1202,9 +1684,9 @@ document.addEventListener('DOMContentLoaded', () => {
             answers = session.answersObject;
           } else {
             // Reconstruct if not saved
-            answers = new Array(12).fill(null);
-            for (let i = 0; i < 12; i++) {
-              if (selectedIndices[i] !== null) {
+            answers = new Array(13).fill(null);
+            for (let i = 0; i < 13; i++) {
+              if (selectedIndices[i] !== null && selectedIndices[i] !== undefined) {
                 answers[i] = {
                   score: 3 - selectedIndices[i]!,
                   sectionIndex: QUESTIONS[i].sectionIndex
@@ -1215,9 +1697,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
           const metrics = calculateScores();
 
-          if (currentQ >= 12) {
-            showState('emailgate');
-            attachEmailGateListeners();
+          if (currentQ >= 13) {
+            renderResults();
+            showState('results');
           } else if (currentQ > 0) {
             showState('question');
             renderQuestion(currentQ);

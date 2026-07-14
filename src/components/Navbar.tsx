@@ -107,7 +107,7 @@ export default function Navbar({ darkMode, setDarkMode, onOpenBooking }: NavbarP
   };
 
   const systems = [
-    { name: "FluxOS", trade: "Emergency Electricians", icon: Zap, href: "https://flux-os-cyan.vercel.app", isLive: true },
+    { name: "FluxOS", trade: "Local Service Businesses", icon: Zap, href: "https://flux-os-cyan.vercel.app", isLive: true },
     { name: "AquaOS", trade: "Plumbers & Water Specialists", icon: Droplets, href: "#", isLive: false },
     { name: "BuildOS", trade: "Builders & Renovators", icon: HardHat, href: "#", isLive: false },
     { name: "ThermoOS", trade: "Heating, Cooling & HVAC", icon: Flame, href: "#", isLive: false },
@@ -174,7 +174,7 @@ export default function Navbar({ darkMode, setDarkMode, onOpenBooking }: NavbarP
     },
     {
       name: "Seasonal Demand Map",
-      desc: "Emergency and seasonal peaks by trade and month.",
+      desc: "Seasonal demand by trade and month.",
       icon: CalendarDays,
       href: "/intelligence/seasonal-demand",
       isNew: false,
@@ -364,7 +364,7 @@ export default function Navbar({ darkMode, setDarkMode, onOpenBooking }: NavbarP
                       FluxOS
                     </h4>
                     <p className="font-sans text-[12px] text-[#1C1C1A]/65 dark:text-[#F5F2EC]/65 mt-1 leading-snug">
-                      Emergency Electricians &mdash; Melbourne
+                      Local Service Businesses &mdash; Melbourne
                     </p>
                     <div className="mt-2.5 font-sans font-bold text-[12px] text-[#1A9080]">
                       43 qualified leads in 30 days

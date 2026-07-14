@@ -69,7 +69,7 @@ export default function CaseStudy() {
             OUTCOMES & PROOF
           </span>
           <h2 className="font-serif font-bold text-3xl md:text-[44px] leading-tight tracking-tight text-[#1C1C1A] dark:text-white">
-            FluxOS Case Study — Melbourne's Emergency Electrician OS
+            FluxOS Case Study — Melbourne's Electrical Systems OS
           </h2>
           <p className="font-sans text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 text-sm md:text-base mt-2">
             Built in 7 days. Live now. Delivering extraordinary conversion rates.
@@ -161,7 +161,7 @@ export default function CaseStudy() {
                 {/* Hero Band */}
                 <div className="p-5 flex-grow font-sans">
                   <span className="text-[#C9A96E] text-[9px] font-bold tracking-[0.15em] uppercase block mb-1">
-                    24/7 Emergency Electrician Melbourne
+                    Top-Rated Electrical Contractor Melbourne
                   </span>
                   <h4 className="font-serif font-bold text-xl leading-tight">
                     Power Outage?

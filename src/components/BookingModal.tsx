@@ -205,7 +205,7 @@ export default function BookingModal({ isOpen, onClose, initialPlan = "" }: Book
                 className="w-full bg-white dark:bg-[#2E2E2C] border border-[#E8E4DC] dark:border-neutral-800 rounded-xl px-4 py-3 text-sm text-[#1C1C1A] dark:text-[#F5F2EC] focus:outline-none focus:border-[#E8622A] transition-colors cursor-pointer"
                 id="form-input-trade"
               >
-                <option value="Electrician">Electrician (Emergency / General)</option>
+                <option value="Electrician">Electrician (Residential & Commercial)</option>
                 <option value="Plumber">Plumber</option>
                 <option value="Roofer">Roofer & restoration specialist</option>
                 <option value="HVAC">HVAC / Air Conditioning</option>

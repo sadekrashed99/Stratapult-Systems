@@ -42,18 +42,46 @@
 
       /* Option cards hover effects */
       .option-card {
-        transition: all 0.15s ease;
+        transition: all 0.18s ease !important;
       }
       .option-card:hover:not(.selected) {
-        background: #FAF7F2;
-        border-color: #C9A96E;
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.07);
-        cursor: pointer;
+        border-color: #E8622A !important;
+        border-width: 2px !important;
+        background-color: rgba(232, 98, 42, 0.04) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(232, 98, 42, 0.12) !important;
+        cursor: pointer !important;
       }
       .dark .option-card:hover:not(.selected) {
-        background: #1F1F1C;
-        border-color: #C9A96E;
+        border-color: #E8622A !important;
+        border-width: 2px !important;
+        background-color: rgba(232, 98, 42, 0.04) !important;
+      }
+      @keyframes fadeSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-fade-slide-up {
+        animation: fadeSlideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      @keyframes insightSlideUp {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .animate-insight-slide-up {
+        animation: insightSlideUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
       }
     </style>
   </head>
@@ -141,7 +169,7 @@
                     </span>
                   </div>
                   <p class="font-sans text-[11px] text-[#1C1C1A]/55 dark:text-[#F5F2EC]/55 truncate">
-                    Emergency Electricians
+                    Local Service Businesses
                   </p>
                 </div>
               </a>
@@ -313,7 +341,7 @@
                     FluxOS
                   </h4>
                   <p class="font-sans text-[12px] text-[#1C1C1A]/65 dark:text-[#F5F2EC]/65 mt-1 leading-snug">
-                    Emergency Electricians &mdash; Melbourne
+                    Local Service Businesses &mdash; Melbourne
                   </p>
                   <div class="mt-2.5 font-sans font-bold text-[12px] text-[#1A9080]">
                     43 qualified leads in 30 days
@@ -537,7 +565,7 @@
                       </span>
                     </div>
                     <span class="font-sans text-[12px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 pl-6 leading-normal">
-                      Emergency and seasonal peaks by trade and month.
+                      Seasonal demand by trade and month.
                     </span>
                   </a>
                 </div>

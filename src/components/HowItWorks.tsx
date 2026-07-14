@@ -172,7 +172,7 @@ export default function HowItWorks() {
                 </span>
               </summary>
               <div className="mt-3 font-sans text-sm md:text-[15px] text-[#1C1C1A]/65 dark:text-[#F5F2EC]/65 leading-relaxed pr-4">
-                Because trades have a very unique, high-intent buyer psychology. A homeowner with a leaking pipe or an emergency power outage doesn't want to browse a "gorgeous" multi-page creative agency brochure. They want to verify competence, see clear pricing/proof, and book immediately. Our systems are engineered specifically for this exact speed-of-trust decision loop.
+                Because trades have a very unique, high-intent buyer psychology. A homeowner with a plumbing leak or an electrical issue doesn't want to browse a "gorgeous" multi-page creative agency brochure. They want to verify competence, see clear pricing/proof, and book immediately. Our systems are engineered specifically for this exact speed-of-trust decision loop.
               </div>
             </details>
 
