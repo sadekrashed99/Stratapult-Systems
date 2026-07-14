@@ -3,6 +3,8 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { gsap } from "gsap";
+
 interface Option {
   text: string;
   pts: number;
@@ -190,6 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let detectedSuburb = '';
   let insightTimer: any = null;
   let advanceTimer: any = null;
+  let introGaugeTween: any = null;
 
   const microInsights: Record<number, { low: string; mid: string; high: string }> = {
     0: {
@@ -282,7 +285,128 @@ document.addEventListener('DOMContentLoaded', () => {
     return { totalScore, leakPercentage, estimatedMonthlyLeak };
   }
 
+  function triggerPreloader() {
+    const preloader = document.getElementById('gsap-preloader');
+    if (!preloader) {
+      currentQ++;
+      saveSessionState();
+      renderResults();
+      showState('results');
+      return;
+    }
+
+    preloader.style.display = 'flex';
+    preloader.style.pointerEvents = 'auto';
+    gsap.to(preloader, { opacity: 1, duration: 0.3 });
+
+    const progressFill = document.getElementById('preloader-progress');
+    const percentSpan = document.getElementById('preloader-percentage');
+    const messageEl = document.getElementById('preloader-message');
+
+    if (progressFill) {
+      gsap.fromTo(progressFill, { width: '0%' }, { width: '100%', duration: 3.2, ease: "none" });
+    }
+
+    let percentObj = { val: 0 };
+    gsap.to(percentObj, {
+      val: 100,
+      duration: 3.2,
+      ease: "none",
+      onUpdate: () => {
+        if (percentSpan) {
+          percentSpan.textContent = Math.round(percentObj.val) + '%';
+        }
+      }
+    });
+
+    const messages = [
+      'Checking Melbourne trade demand signals...',
+      'Calculating custom average job value...',
+      'Pinpointing your biggest revenue leaks...'
+    ];
+
+    if (messageEl) {
+      messageEl.style.opacity = '1';
+      messageEl.textContent = messages[0];
+
+      setTimeout(() => {
+        gsap.to(messageEl, {
+          opacity: 0,
+          duration: 0.2,
+          onComplete: () => {
+            messageEl.textContent = messages[1];
+            gsap.to(messageEl, { opacity: 1, duration: 0.2 });
+          }
+        });
+      }, 1100);
+
+      setTimeout(() => {
+        gsap.to(messageEl, {
+          opacity: 0,
+          duration: 0.2,
+          onComplete: () => {
+            messageEl.textContent = messages[2];
+            gsap.to(messageEl, { opacity: 1, duration: 0.2 });
+          }
+        });
+      }, 2200);
+    }
+
+    setTimeout(() => {
+      gsap.to(preloader, {
+        opacity: 0,
+        duration: 0.4,
+        onComplete: () => {
+          preloader.style.display = 'none';
+          preloader.style.pointerEvents = 'none';
+          currentQ++;
+          saveSessionState();
+          renderResults();
+          showState('results');
+        }
+      });
+    }, 3200);
+  }
+
   // 3. STATE MACHINE
+  function startIntroGaugeAnimation() {
+    const needle = document.getElementById('gauge-needle');
+    const dollar = document.getElementById('leak-dollar');
+    if (dollar) {
+      dollar.textContent = '$—';
+    }
+    if (!needle) return;
+
+    // Reset transitions first so they don't fight GSAP
+    needle.style.transition = 'none';
+
+    // Animate needle back and forth between 20% and 75%
+    // 20% is -90 + 0.2 * 180 = -54deg
+    // 75% is -90 + 0.75 * 180 = 45deg
+    introGaugeTween = gsap.fromTo(needle, 
+      { rotation: -54 },
+      { 
+        rotation: 45, 
+        duration: 3, 
+        repeat: -1, 
+        yoyo: true, 
+        ease: "power1.inOut",
+        transformOrigin: "140px 120px"
+      }
+    );
+  }
+
+  function stopIntroGaugeAnimation() {
+    if (introGaugeTween) {
+      introGaugeTween.kill();
+      introGaugeTween = null;
+    }
+    const needle = document.getElementById('gauge-needle');
+    if (needle) {
+      needle.style.transition = 'transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1)';
+    }
+  }
+
   function showState(stateName: string) {
     // Use inline styles — bypasses all CSS class specificity issues
     ['intro', 'question', 'emailgate', 'email-gate', 'results'].forEach(id => {
@@ -303,6 +427,12 @@ document.addEventListener('DOMContentLoaded', () => {
       console.log(`showState: showing #state-${stateName}`);
     } else {
       console.error(`showState: #state-${stateName} NOT FOUND in DOM`);
+    }
+
+    if (stateName === 'intro') {
+      startIntroGaugeAnimation();
+    } else {
+      stopIntroGaugeAnimation();
     }
 
     if (typeof (window as any).lucide !== 'undefined') {
@@ -342,7 +472,13 @@ document.addEventListener('DOMContentLoaded', () => {
       'mobile-leak-amount-gate'
     ].forEach(id => {
       const el = document.getElementById(id);
-      if (el) el.textContent = '$' + estLeak.toLocaleString();
+      if (el) {
+        if (id === 'leak-dollar' && introGaugeTween) {
+          el.textContent = '$—';
+        } else {
+          el.textContent = '$' + estLeak.toLocaleString();
+        }
+      }
     });
   }
 
@@ -588,7 +724,7 @@ document.addEventListener('DOMContentLoaded', () => {
               }
             }, 300);
 
-            // Stays visible for 1.4 seconds before auto-advancing, so 300ms + 1400ms = 1700ms total
+            // Stays visible for 3 seconds before auto-advancing, so 300ms + 3000ms = 3300ms total
             advanceTimer = setTimeout(() => {
               const isSectionEnd = [3, 6, 9].includes(currentQ);
               if (isSectionEnd) {
@@ -602,7 +738,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderQuestion(currentQ);
                 showState('question');
               }
-            }, 1700);
+            }, 3300);
+          } else {
+            // Q12 clicked: 300ms delay to let option card highlight render before showing preloader cover-up
+            advanceTimer = setTimeout(() => {
+              triggerPreloader();
+            }, 300);
           }
         });
       }
@@ -623,10 +764,7 @@ document.addEventListener('DOMContentLoaded', () => {
           const isSectionEnd = [3, 6, 9].includes(currentQ);
           
           if (isLastQ) {
-            currentQ++;
-            saveSessionState();
-            renderResults();
-            showState('results');
+            triggerPreloader();
           } else if (isSectionEnd) {
             showSectionTransition(currentQ + 1, function() {
               currentQ++;
@@ -1719,6 +1857,26 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // 13. BOOTSTRAPPING
+  async function fetchGeoLocationStat() {
+    const geoEl = document.getElementById("geo-stat-line");
+    if (!geoEl) return;
+    try {
+      const res = await fetch("https://ipapi.co/json/");
+      if (!res.ok) throw new Error("Fetch failed");
+      const data = await res.json();
+      const city = data.city;
+      const country = data.country_code || data.country;
+      if (country === "AU" && city) {
+        geoEl.innerHTML = `<strong>2,847</strong> ${city} tradies audited &middot; Average leak found: <strong>$6,800/month</strong>`;
+      } else {
+        geoEl.innerHTML = `<strong>2,847</strong> Australian tradies audited &middot; Average leak found: <strong>$6,800/month</strong>`;
+      }
+    } catch (err) {
+      geoEl.innerHTML = `<strong>2,847</strong> Australian tradies audited &middot; Average leak found: <strong>$6,800/month</strong>`;
+    }
+  }
+
+  fetchGeoLocationStat();
   initTheme();
   initNavbarAndMenu();
 

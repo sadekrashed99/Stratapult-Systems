@@ -45,17 +45,15 @@
         transition: all 0.18s ease !important;
       }
       .option-card:hover:not(.selected) {
-        border-color: #E8622A !important;
-        border-width: 2px !important;
-        background-color: rgba(232, 98, 42, 0.04) !important;
         transform: translateY(-2px) !important;
-        box-shadow: 0 4px 12px rgba(232, 98, 42, 0.12) !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important;
+        border: 2px solid #E8622A !important;
         cursor: pointer !important;
       }
       .dark .option-card:hover:not(.selected) {
-        border-color: #E8622A !important;
-        border-width: 2px !important;
-        background-color: rgba(232, 98, 42, 0.04) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.10) !important;
+        border: 2px solid #E8622A !important;
       }
       @keyframes fadeSlideUp {
         from {
@@ -128,8 +126,8 @@
         <!-- Desktop Action Controls Right -->
         <div class="hidden md:flex items-center gap-6">
           <!-- CTA Button -->
-          <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="bg-[#E8622A] hover:bg-[#ff763d] text-[#F5F2EC] font-sans font-bold text-[14px] px-6 py-[12px] rounded-full transition-all duration-300 shadow-md shadow-[#E8622A]/10 hover:scale-[1.04] hover:shadow-[0_8px_24px_rgba(232,98,42,0.35)] inline-flex items-center gap-1 cursor-pointer">
-            Get FluxOS &rarr;
+          <a href="/#book" class="bg-[#E8622A] hover:bg-[#ff763d] text-[#F5F2EC] font-sans font-bold text-[14px] px-6 py-[12px] rounded-full transition-all duration-300 shadow-md shadow-[#E8622A]/10 hover:scale-[1.04] hover:shadow-[0_8px_24px_rgba(232,98,42,0.35)] inline-flex items-center gap-1 cursor-pointer">
+            Book a Strategy Call
           </a>
         </div>
 
@@ -499,8 +497,9 @@
                 </a>
               </div>
             </div>
+          </div>
 
-            <!-- COLUMN 2 [25%] — MARKET INTELLIGENCE -->
+          <!-- COLUMN 2 [25%] — MARKET INTELLIGENCE -->
             <div class="col-span-3 border-r border-[#1C1C1A]/10 dark:border-[#2E2E2C] pr-6 flex flex-col justify-between">
               <div>
                 <div class="flex items-center gap-2 text-[#1A9080] mb-1">
@@ -597,29 +596,29 @@
                 <svg viewBox="0 0 100 55" class="w-[120px] h-auto overflow-visible">
                   <defs>
                     <linearGradient id="miniGaugeGradientNavbar2" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="#87c7be" />
-                      <stop offset="50%" stopColor="#C9A96E" />
-                      <stop offset="100%" stopColor="#ff9a70" />
+                      <stop offset="0%" stop-color="#87c7be" />
+                      <stop offset="50%" stop-color="#C9A96E" />
+                      <stop offset="100%" stop-color="#ff9a70" />
                     </linearGradient>
                   </defs>
                   <path
                     d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
                     stroke="#147265"
-                    strokeWidth="8"
-                    strokeLinecap="round"
+                    stroke-width="8"
+                    stroke-linecap="round"
                   />
                   <path
                     d="M 10 50 A 40 40 0 0 1 90 50"
                     fill="none"
                     stroke="url(#miniGaugeGradientNavbar2)"
-                    strokeWidth="8"
-                    strokeLinecap="round"
-                    strokeDasharray="125"
-                    strokeDashoffset="50"
+                    stroke-width="8"
+                    stroke-linecap="round"
+                    stroke-dasharray="125"
+                    stroke-dashoffset="50"
                   />
                   <g class="origin-[50px_50px]" style="transform: rotate(18deg);">
-                    <line x1="50" y1="50" x2="50" y2="15" stroke="#FFFFFF" strokeWidth="2.5" strokeLinecap="round" />
+                    <line x1="50" y1="50" x2="50" y2="15" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" />
                     <circle cx="50" cy="50" r="3.5" fill="#FFFFFF" />
                   </g>
                 </svg>
@@ -679,7 +678,6 @@
         <div class="w-2 h-2 rounded-full bg-[#E8622A] animate-ping"></div>
         <span id="coming-soon-toast-text">Paid Ads ROI Calculator is coming soon!</span>
       </div>
-    </nav>
 
     <!-- MOBILE MEGA MENU DRAWER -->
     <div
@@ -889,7 +887,7 @@
         </p>
 
         <!-- Centered Intro Leak Meter -->
-        <div class="mb-10 p-6 bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl shadow-xs w-full max-w-sm">
+        <div class="mb-10 p-6 bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl shadow-xs w-full max-w-sm mx-auto">
           <!-- Leak Meter Component (Full SVG Semicircle) -->
           <div class="w-full flex justify-center">
             <svg width="260" height="155" viewBox="0 0 280 155" class="w-[200px] md:w-[260px] h-[115px] md:h-[150px] overflow-visible" id="intro-leak-meter-svg">
@@ -949,7 +947,7 @@
         <!-- Social Proof -->
         <div class="flex items-center gap-2 text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 font-sans text-[14px] mb-8">
           <i data-lucide="users" class="w-4 h-4 text-[#1A9080]"></i>
-          <span><strong>2,847</strong> Melbourne tradies audited &middot; Average leak found: <strong>$6,800/month</strong></span>
+          <span id="geo-stat-line"><strong>2,847</strong> Melbourne tradies audited &middot; Average leak found: <strong>$6,800/month</strong></span>
         </div>
 
         <!-- CTA Button -->
@@ -958,8 +956,8 @@
         </button>
 
         <!-- No Email Disclaimer -->
-        <span class="text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 text-[13px] font-sans">
-          No email required to start.
+        <span class="text-[#6B7280] text-[13px] font-sans">
+          No email required — instant on-screen analysis
         </span>
       </section>
 
@@ -1207,6 +1205,27 @@
 
       </div>
     </footer>
+
+    <!-- GSAP Full-Screen Preloader -->
+    <div id="gsap-preloader" style="display: none; opacity: 0; pointer-events: none;" class="fixed inset-0 bg-[#1C1C1A] z-[9999] flex flex-col items-center justify-center text-[#F5F2EC] px-6 select-none">
+      <div class="max-w-md w-full flex flex-col items-center">
+        <!-- Message text -->
+        <p id="preloader-message" class="font-sans text-lg md:text-xl font-medium text-center text-white opacity-0 mb-8 transition-opacity duration-300 min-h-[56px] flex items-center justify-center">
+          Checking Melbourne trade demand signals...
+        </p>
+        
+        <!-- Progress track -->
+        <div class="w-full h-[6px] bg-white/10 rounded-full overflow-hidden mb-4 relative">
+          <!-- Progress fill -->
+          <div id="preloader-progress" class="h-full bg-[#E8622A] w-0 rounded-full"></div>
+        </div>
+        
+        <!-- Percentage indicator -->
+        <div class="font-mono text-sm text-white/50 tracking-wider">
+          ANALYSING DATA: <span id="preloader-percentage" class="text-white font-bold">0%</span>
+        </div>
+      </div>
+    </div>
 
     <!-- Main Logic Script (processed by Vite) -->
     <script type="module" src="./audit.ts"></script>
