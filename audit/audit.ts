@@ -777,16 +777,6 @@ document.addEventListener('DOMContentLoaded', () => {
     } else {
       document.documentElement.classList.remove("dark");
     }
-
-    const desktopToggle = document.getElementById("theme-toggle-desktop");
-    const mobileToggle = document.getElementById("theme-toggle-mobile");
-
-    [desktopToggle, mobileToggle].forEach(btn => {
-      btn?.addEventListener("click", () => {
-        const active = document.documentElement.classList.toggle("dark");
-        localStorage.setItem("darkMode", String(active));
-      });
-    });
   }
 
   function initMenu() {

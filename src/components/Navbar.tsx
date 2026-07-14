@@ -2,8 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import {
   Menu,
   X,
-  Sun,
-  Moon,
   ChevronDown,
   Zap,
   Droplets,
@@ -258,16 +256,8 @@ export default function Navbar({ darkMode, setDarkMode, onOpenBooking }: NavbarP
             </a>
           </div>
 
-          {/* Desktop Theme Toggle + Book Strategy Call Right */}
+          {/* Desktop Book Strategy Call Right */}
           <div className="hidden md:flex items-center gap-6">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full hover:bg-[#1C1C1A]/5 dark:hover:bg-white/5 text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors duration-200 focus:outline-none cursor-pointer"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
-            </button>
-
             <MagneticButton
               onClick={onOpenBooking}
               className="bg-[#E8622A] text-[#F5F2EC] font-sans font-bold text-[14px] px-6 py-[12px] rounded-full hover:scale-[1.04] hover:shadow-[0_8px_24px_rgba(232,98,42,0.35)] transition-all duration-300 cursor-none"
@@ -276,16 +266,8 @@ export default function Navbar({ darkMode, setDarkMode, onOpenBooking }: NavbarP
             </MagneticButton>
           </div>
 
-          {/* Mobile Right: Hamburger button + Dark Mode button */}
+          {/* Mobile Right: Hamburger button */}
           <div className="flex items-center gap-3 md:hidden">
-            <button
-              onClick={() => setDarkMode(!darkMode)}
-              className="p-2 rounded-full text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors"
-              aria-label="Toggle dark mode"
-            >
-              {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
-
             <button
               onClick={toggleMobileMenu}
               className="p-2 text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors"
