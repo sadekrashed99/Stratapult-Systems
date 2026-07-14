@@ -1,0 +1,8 @@
+{
+  "name": "Remix: Remix: Stratapult",
+  "description": "Operating Systems for Australian trade businesses. Not websites. Revenue engines.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Revenue Leak Audit — Stratapult Systems</title>
+    <meta name="description" content="Find out exactly where your trade business is losing revenue. 12 questions. 3 minutes 47 seconds. Free." />
+    <!-- Fonts and Tailwind CSS processed by Vite -->
+    <link rel="stylesheet" href="/src/index.css" />
+    <!-- Lucide icons CDN for Vanilla JS environment -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+      /* Ensure clean, custom theme colors for active state and transition classes */
+      .bg-cream-custom { background-color: #F5F2EC; }
+      .text-charcoal-custom { color: #1C1C1A; }
+      .border-cream-custom { border-color: #F5F2EC; }
+      .border-charcoal-custom { border-color: #1C1C1A; }
+      
+      /* Subtle CSS slide transitions for states */
+      .state-hidden {
+        display: none !important;
+      }
+      .fade-enter-active {
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      }
+      .fade-enter-from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      
+      /* Active state styles for answer cards */
+      .answer-card-active {
+        border-color: #1A9080 !important;
+        background-color: rgba(26, 144, 128, 0.08) !important;
+      }
+      
+      /* Hover state styles for answer cards */
+      .answer-card-hover:hover {
+        border-color: #1A9080 !important;
+        background-color: rgba(26, 144, 128, 0.05) !important;
+      }
+    </style>
+  </head>
+  <body class="bg-[#F5F2EC] dark:bg-[#141412] text-[#1C1C1A] dark:text-[#F5F2EC] font-sans transition-colors-theme select-none min-h-screen flex flex-col overflow-x-hidden">
+    
+    <!-- 1. STICKY HEADER NAVBAR -->
+    <nav id="navbar" class="fixed top-0 left-0 right-0 z-50 h-[72px] bg-[#F5F2EC]/92 dark:bg-[#141412]/92 backdrop-blur-md border-b border-[#1C1C1A]/10 dark:border-[#2E2E2C] transition-colors-theme">
+      <div class="max-w-[1280px] h-full mx-auto px-6 flex items-center justify-between">
+        
+        <!-- Logo / Wordmark Left -->
+        <a href="/" class="font-sans font-extrabold text-[20px] tracking-[0.12em] text-[#1C1C1A] dark:text-[#F5F2EC] flex items-center gap-0.5 select-none">
+          STRATAPULT<sup class="text-[#1A9080] font-bold text-[0.6em] relative -top-1">OS</sup>
+        </a>
+
+        <!-- Desktop Navigation Center (pointing back to homepage sections) -->
+        <div class="hidden md:flex items-center gap-[40px] h-full">
+          <a href="/" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
+            Home
+          </a>
+          <a href="/#our-os" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
+            Systems
+          </a>
+          <a href="/#results" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
+            Results
+          </a>
+          <a href="/#pricing" class="font-sans font-semibold text-[14px] text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#1A9080] transition-colors duration-200">
+            Resources
+          </a>
+        </div>
+
+        <!-- Desktop Action Controls Right -->
+        <div class="hidden md:flex items-center gap-6">
+          <!-- Dark Mode Toggle -->
+          <button id="theme-toggle-desktop" class="p-2 rounded-full hover:bg-[#1C1C1A]/5 dark:hover:bg-white/5 text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors duration-200 focus:outline-none cursor-pointer" aria-label="Toggle dark mode">
+            <!-- Icons rendered dynamically or with simple class triggers -->
+            <i data-lucide="moon" class="w-[16px] h-[16px] dark:hidden"></i>
+            <i data-lucide="sun" class="w-[16px] h-[16px] hidden dark:block"></i>
+          </button>
+
+          <!-- CTA Button -->
+          <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="bg-[#E8622A] hover:bg-[#ff763d] text-[#F5F2EC] font-sans font-bold text-[14px] px-6 py-[12px] rounded-full transition-all duration-300 shadow-md shadow-[#E8622A]/10 hover:scale-[1.04] inline-flex items-center gap-1">
+            Get FluxOS &rarr;
+          </a>
+        </div>
+
+        <!-- Mobile Action Controls Right -->
+        <div class="flex items-center gap-3 md:hidden">
+          <button id="theme-toggle-mobile" class="p-2 rounded-full text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors" aria-label="Toggle dark mode">
+            <i data-lucide="moon" class="w-[18px] h-[18px] dark:hidden"></i>
+            <i data-lucide="sun" class="w-[18px] h-[18px] hidden dark:block"></i>
+          </button>
+
+          <button id="mobile-menu-trigger" class="p-2 text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors" aria-label="Open navigation menu">
+            <i data-lucide="menu" class="w-[22px] h-[22px]" id="mobile-hamburger-icon"></i>
+          </button>
+        </div>
+
+      </div>
+    </nav>
+
+    <!-- MOBILE MENU DRAWER -->
+    <div id="mobile-drawer" class="fixed inset-0 z-50 bg-[#F5F2EC] dark:bg-[#141412] flex flex-col justify-between p-6 transition-transform duration-500 ease-out translate-x-full md:hidden overflow-y-auto">
+      <!-- Top bar with close button -->
+      <div class="flex justify-between items-center h-[72px] w-full px-2">
+        <span class="font-sans font-extrabold text-[20px] tracking-[0.12em] text-[#1C1C1A] dark:text-[#F5F2EC]">
+          STRATAPULT<sup class="text-[#1A9080] font-bold text-[0.6em] relative -top-1">OS</sup>
+        </span>
+        <button id="mobile-menu-close" class="p-2 text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#E8622A] transition-colors" aria-label="Close navigation menu">
+          <i data-lucide="x" class="w-[24px] h-[24px]"></i>
+        </button>
+      </div>
+
+      <!-- Links -->
+      <div class="flex flex-col gap-6 my-auto py-8">
+        <div class="flex flex-col gap-5 text-center">
+          <a href="/" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Home</a>
+          <a href="/#our-os" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Systems</a>
+          <a href="/#results" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Results</a>
+          <a href="/#pricing" class="font-serif font-bold text-3xl text-[#1C1C1A] dark:text-[#F5F2EC] hover:text-[#1A9080] transition-colors">Resources</a>
+        </div>
+      </div>
+
+      <!-- Action Button -->
+      <div class="flex flex-col gap-4 w-full max-w-sm mx-auto mb-4 text-center">
+        <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="w-full bg-[#E8622A] text-white font-sans font-bold py-4 rounded-full text-center hover:bg-[#ff763d] transition-colors">
+          Get FluxOS &rarr;
+        </a>
+        <span class="text-xs text-[#6B6B68] dark:text-[#9CA3AF] font-sans">
+          hello@stratapult.com.au
+        </span>
+      </div>
+    </div>
+
+
+    <!-- 2. MAIN CONTAINER AREA -->
+    <main class="flex-grow pt-[72px]">
+
+      <!-- ========================================== -->
+      <!-- STATE 1: INTRO SCREEN -->
+      <!-- ========================================== -->
+      <section id="state-intro" class="max-w-[680px] mx-auto px-6 py-16 md:py-24 text-center flex flex-col items-center">
+        <!-- Eyebrow -->
+        <span class="text-[#E8622A] font-sans font-bold text-[13px] tracking-[2px] uppercase mb-4 block">
+          FREE REVENUE TOOL
+        </span>
+
+        <!-- Headline -->
+        <h1 class="font-display font-bold text-[38px] md:text-[52px] text-[#1C1C1A] dark:text-[#F5F2EC] leading-tight tracking-tight mb-6">
+          The Revenue Leak Audit
+        </h1>
+
+        <!-- Subheadline -->
+        <p class="font-sans text-[17px] md:text-[20px] text-[#1C1C1A]/70 dark:text-[#F5F2EC]/70 leading-relaxed mb-10 max-w-2xl">
+          12 questions. 3 minutes 47 seconds. Find out exactly where your revenue is bleeding — and what it’s costing you every month.
+        </p>
+
+        <!-- Centered Intro Leak Meter -->
+        <div class="mb-10 p-6 bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl shadow-xs w-full max-w-sm">
+          <!-- Leak Meter Component (Full SVG Semicircle) -->
+          <div class="w-full flex justify-center">
+            <svg width="260" height="155" viewBox="0 0 280 155" class="w-[200px] md:w-[260px] h-[115px] md:h-[150px] overflow-visible" id="intro-leak-meter-svg">
+              <defs>
+                <linearGradient id="gaugeGradientIntro" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stop-color="#1A9080" />
+                  <stop offset="50%" stop-color="#C9A96E" />
+                  <stop offset="100%" stop-color="#E8622A" />
+                </linearGradient>
+              </defs>
+              <path d="M 30 120 A 110 110 0 0 1 250 120" fill="none" stroke="#E8E5DF" stroke-width="18" stroke-linecap="round" class="dark:stroke-[#2E2E2C]" />
+              <path d="M 30 120 A 110 110 0 0 1 250 120" fill="none" stroke="url(#gaugeGradientIntro)" stroke-width="18" stroke-linecap="round" />
+              <text x="25" y="145" fill="#1A9080" font-size="11" font-family="var(--font-sans)" font-weight="700" text-anchor="start">FULL REVENUE</text>
+              <text x="255" y="145" fill="#E8622A" font-size="11" font-family="var(--font-sans)" font-weight="700" text-anchor="end">MAJOR LEAK</text>
+              <!-- Needle -->
+              <g id="gauge-needle" class="origin-[140px_120px] transition-transform duration-[0.7s] cubic-bezier(0.34, 1.56, 0.64, 1)" style="transform: rotate(-90deg);">
+                <line x1="140" y1="120" x2="140" y2="20" stroke="#1C1C1A" stroke-width="2.5" stroke-linecap="round" class="dark:stroke-[#F5F2EC]" />
+                <circle cx="140" cy="120" r="6" fill="#1C1C1A" class="dark:fill-[#F5F2EC]" />
+              </g>
+            </svg>
+          </div>
+          <!-- Label & Dollar Amount Below -->
+          <div class="text-center mt-3">
+            <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-[11px] font-sans font-bold tracking-[2px] uppercase">ESTIMATED MONTHLY LEAK</span>
+            <div id="leak-dollar" class="text-[#1C1C1A] dark:text-[#F5F2EC] font-display font-bold text-[36px] mt-1 leading-none">$0</div>
+          </div>
+        </div>
+
+        <!-- 2x2 Category Pills Grid -->
+        <div class="grid grid-cols-2 gap-4 w-full max-w-[540px] mb-12">
+          <div class="flex items-center gap-3 bg-white dark:bg-[#1C1C1A] border-1.5 border-[#1A9080] px-5 py-3.5 rounded-full text-left">
+            <div class="text-[#1A9080] shrink-0">
+              <i data-lucide="search" class="w-4 h-4"></i>
+            </div>
+            <span class="font-sans text-[14px] font-medium text-[#1C1C1A] dark:text-[#F5F2EC]">Getting Found</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white dark:bg-[#1C1C1A] border-1.5 border-[#1A9080] px-5 py-3.5 rounded-full text-left">
+            <div class="text-[#1A9080] shrink-0">
+              <i data-lucide="phone" class="w-4 h-4"></i>
+            </div>
+            <span class="font-sans text-[14px] font-medium text-[#1C1C1A] dark:text-[#F5F2EC]">Capturing Leads</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white dark:bg-[#1C1C1A] border-1.5 border-[#1A9080] px-5 py-3.5 rounded-full text-left">
+            <div class="text-[#1A9080] shrink-0">
+              <i data-lucide="briefcase" class="w-4 h-4"></i>
+            </div>
+            <span class="font-sans text-[14px] font-medium text-[#1C1C1A] dark:text-[#F5F2EC]">Converting Jobs</span>
+          </div>
+          <div class="flex items-center gap-3 bg-white dark:bg-[#1C1C1A] border-1.5 border-[#1A9080] px-5 py-3.5 rounded-full text-left">
+            <div class="text-[#1A9080] shrink-0">
+              <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+            </div>
+            <span class="font-sans text-[14px] font-medium text-[#1C1C1A] dark:text-[#F5F2EC]">Retain & Grow</span>
+          </div>
+        </div>
+
+        <!-- Social Proof -->
+        <div class="flex items-center gap-2 text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 font-sans text-[14px] mb-8">
+          <i data-lucide="users" class="w-4 h-4 text-[#1A9080]"></i>
+          <span><strong>2,847</strong> Melbourne tradies audited &middot; Average leak found: <strong>$6,800/month</strong></span>
+        </div>
+
+        <!-- CTA Button -->
+        <button id="start-btn" class="bg-[#E8622A] hover:bg-[#ff763d] text-white font-sans font-bold text-[18px] px-12 py-5 rounded-full transition-all duration-300 shadow-lg shadow-[#E8622A]/15 hover:scale-[1.04] mb-3 cursor-pointer">
+          Start the Audit &rarr;
+        </button>
+
+        <!-- No Email Disclaimer -->
+        <span class="text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 text-[13px] font-sans">
+          No email required to start.
+        </span>
+      </section>
+
+
+      <!-- ========================================== -->
+      <!-- STATE 2 & 3: QUESTIONS & EMAIL GATE SCREEN -->
+      <!-- ========================================== -->
+      <!-- ========================================== -->
+      <!-- STATE 2: QUESTIONS SCREEN -->
+      <!-- ========================================== -->
+      <section id="state-question" class="state-hidden max-w-[1280px] mx-auto px-6 pb-20 flex flex-col">
+        <!-- Dynamically populated by renderQuestion() -->
+      </section>
+
+
+      <!-- ========================================== -->
+      <!-- STATE 3: EMAIL GATE SCREEN -->
+      <!-- ========================================== -->
+      <section id="state-emailgate" class="state-hidden max-w-[1280px] mx-auto px-6 pb-20 flex flex-col">
+        
+        <!-- Sticky Mini Leak Meter for Mobile Only -->
+        <div class="md:hidden bg-white dark:bg-[#1C1C1A] border border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl px-5 py-4 sticky top-[72px] z-30 shadow-xs mb-6">
+          <div class="flex justify-between items-center mb-2.5">
+            <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-[11px] font-sans font-bold uppercase tracking-[1px]">Est. Monthly Leak:</span>
+            <span id="mobile-leak-amount-gate" class="text-[#E8622A] font-display font-bold text-[22px] leading-none">$0</span>
+          </div>
+          <!-- Mini gradient bar indicator -->
+          <div class="relative w-full h-2 bg-[#E8E5DF] dark:bg-[#2E2E2C] rounded-full overflow-visible">
+            <div class="absolute inset-0 rounded-full bg-gradient-to-r from-[#1A9080] via-[#C9A96E] to-[#E8622A]"></div>
+            <div id="mobile-needle-indicator-gate" class="absolute top-1/2 -translate-y-1/2 w-[16px] h-[16px] bg-white border-[3px] border-[#1C1C1A] rounded-full shadow-md transition-all duration-700 cubic-bezier(0.34, 1.56, 0.64, 1)" style="left: 0%;"></div>
+          </div>
+        </div>
+
+        <!-- 2-Column Desktop Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start w-full">
+          
+          <!-- Column 1 (Left 65% / Col span 8) -->
+          <div class="md:col-span-8 flex flex-col relative min-h-[460px]">
+            
+            <!-- THE EMAIL GATE CARD -->
+            <div class="bg-white dark:bg-[#1C1C1A] border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-6 md:p-11 shadow-md flex flex-col justify-between min-h-[440px]">
+              
+              <form id="email-gate-form" class="flex flex-col gap-4">
+                <div>
+                  <!-- Headline -->
+                  <h2 class="font-display font-bold text-[28px] md:text-[32px] text-[#1C1C1A] dark:text-[#F5F2EC] leading-tight mb-3">
+                    Your audit is ready.
+                  </h2>
+                  <!-- Subheadline -->
+                  <p class="font-sans text-[15px] md:text-[17px] text-[#1C1C1A]/60 dark:text-[#F5F2EC]/60 leading-relaxed mb-8">
+                    Enter your details to unlock your score and see exactly where you’re leaking revenue.
+                  </p>
+                </div>
+
+                <!-- Input fields stacked, full width -->
+                <div class="flex flex-col gap-4">
+                  <!-- First Name -->
+                  <div class="flex flex-col">
+                    <input type="text" id="field-firstname" placeholder="Your first name" class="bg-[#F5F2EC] dark:bg-[#141412] border-1.5 border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3.5 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[52px]" required />
+                    <span id="error-first-name" class="text-[#E8622A] text-xs mt-1 hidden">First name is required.</span>
+                  </div>
+
+                  <!-- Email Address -->
+                  <div class="flex flex-col">
+                    <input type="email" id="field-email" placeholder="Work email address" class="bg-[#F5F2EC] dark:bg-[#141412] border-1.5 border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3.5 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[52px]" required />
+                    <span id="error-email" class="text-[#E8622A] text-xs mt-1 hidden">Please enter a valid work email address.</span>
+                  </div>
+
+                  <!-- Mobile Number (Optional) -->
+                  <div class="flex flex-col">
+                    <label for="field-phone" class="block text-[11px] font-bold font-sans text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 uppercase tracking-[1px] mb-1.5">Mobile Number</label>
+                    <input type="tel" id="field-phone" placeholder="04XX XXX XXX" class="bg-[#F5F2EC] dark:bg-[#141412] border-1.5 border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3.5 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[52px]" />
+                  </div>
+
+                  <!-- Trade Type Select -->
+                  <div class="flex flex-col">
+                    <select id="field-trade" class="bg-[#F5F2EC] dark:bg-[#141412] border-1.5 border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3.5 font-sans focus:outline-none focus:border-[#1A9080] transition-colors h-[52px]" required>
+                      <option value="" disabled selected>Select your trade</option>
+                      <option value="Electrician">Electrician</option>
+                      <option value="Plumber">Plumber</option>
+                      <option value="Builder">Builder</option>
+                      <option value="Concreter">Concreter</option>
+                      <option value="Plasterer">Plasterer</option>
+                      <option value="Painter">Painter</option>
+                      <option value="Tiler">Tiler</option>
+                      <option value="Roofer">Roofer</option>
+                      <option value="Air Con">Air Con / HVAC</option>
+                      <option value="Landscaper">Landscaper</option>
+                      <option value="Other">Other Trade</option>
+                    </select>
+                    <span id="error-trade-type" class="text-[#E8622A] text-xs mt-1 hidden">Please select your trade.</span>
+                  </div>
+
+                  <!-- Suburb / Postcode -->
+                  <div class="flex flex-col">
+                    <input type="text" id="field-suburb" placeholder="Suburb or postcode (e.g. Carlton, 3000)" class="bg-[#F5F2EC] dark:bg-[#141412] border-1.5 border-[#D8D4CC] dark:border-[#2E2E2C] text-[#1C1C1A] dark:text-[#F5F2EC] rounded-xl px-4 py-3.5 font-sans placeholder-[#1C1C1A]/40 dark:placeholder-[#F5F2EC]/40 focus:outline-none focus:border-[#1A9080] transition-colors h-[52px]" required />
+                    <span id="error-suburb" class="text-[#E8622A] text-xs mt-1 hidden">Suburb or postcode is required.</span>
+                  </div>
+                </div>
+
+                <!-- Unlock Score CTA -->
+                <div class="mt-8">
+                  <button type="submit" id="btn-submit-gate" class="bg-[#E8622A] hover:bg-[#ff763d] text-white font-sans font-bold text-[18px] py-4.5 rounded-full w-full transition-all duration-200 hover:scale-[1.02] flex items-center justify-center gap-2.5 shadow-md shadow-[#E8622A]/10 cursor-pointer">
+                    <!-- Spinner loader (hidden by default) -->
+                    <div id="gate-spinner" class="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin hidden"></div>
+                    <span id="gate-btn-text">Unlock My Revenue Score &rarr;</span>
+                  </button>
+
+                  <!-- No Spam disclaimer with Lock icon -->
+                  <div class="flex items-center justify-center gap-1.5 text-[#1C1C1A]/40 dark:text-[#F5F2EC]/40 text-[12px] font-sans mt-4">
+                    <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                    <span>No spam. Your results are never shared.</span>
+                  </div>
+                </div>
+              </form>
+
+            </div>
+
+          </div>
+
+          <!-- Column 2 (Right 35% / Col span 4 - Desktop Sticky Leak Meter) -->
+          <div class="hidden md:block md:col-span-4 sticky top-[110px]">
+            <div class="bg-white dark:bg-[#1C1C1A] border-1.5 border-[#E8E5DF] dark:border-[#2E2E2C] rounded-2xl p-8 shadow-xs flex flex-col items-center">
+              
+              <!-- Leak Meter Semicircle SVG -->
+              <div class="w-full flex justify-center">
+                <svg width="260" height="155" viewBox="0 0 280 155" class="w-full overflow-visible">
+                  <defs>
+                    <linearGradient id="gaugeGradientGate" x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stop-color="#1A9080" />
+                      <stop offset="50%" stop-color="#C9A96E" />
+                      <stop offset="100%" stop-color="#E8622A" />
+                    </linearGradient>
+                  </defs>
+                  <path d="M 30 120 A 110 110 0 0 1 250 120" fill="none" stroke="#E8E5DF" stroke-width="18" stroke-linecap="round" class="dark:stroke-[#2E2E2C]" />
+                  <path d="M 30 120 A 110 110 0 0 1 250 120" fill="none" stroke="url(#gaugeGradientGate)" stroke-width="18" stroke-linecap="round" />
+                  <text x="25" y="145" fill="#1A9080" font-size="11" font-family="var(--font-sans)" font-weight="700" text-anchor="start">FULL REVENUE</text>
+                  <text x="255" y="145" fill="#E8622A" font-size="11" font-family="var(--font-sans)" font-weight="700" text-anchor="end">MAJOR LEAK</text>
+                  <!-- Needle -->
+                  <g id="gauge-needle-gate" class="origin-[140px_120px] transition-transform duration-[0.7s] cubic-bezier(0.34, 1.56, 0.64, 1)" style="transform: rotate(-90deg);">
+                    <line x1="140" y1="120" x2="140" y2="20" stroke="#1C1C1A" stroke-width="2.5" stroke-linecap="round" class="dark:stroke-[#F5F2EC]" />
+                    <circle cx="140" cy="120" r="6" fill="#1C1C1A" class="dark:fill-[#F5F2EC]" />
+                  </g>
+                </svg>
+              </div>
+
+              <!-- Estimated Monthly Leak labels -->
+              <div class="text-center mt-5">
+                <span class="text-[#1C1C1A]/50 dark:text-[#F5F2EC]/50 text-[11px] font-sans font-bold tracking-[2px] uppercase">ESTIMATED MONTHLY LEAK</span>
+                <div id="leak-dollar-gate" class="text-[#1C1C1A] dark:text-[#F5F2EC] font-display font-bold text-[36px] mt-1 leading-none">$0</div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+
+      <!-- ========================================== -->
+      <!-- STATE 4: RESULTS SCREEN -->
+      <!-- ========================================== -->
+      <section id="state-results" class="state-hidden max-w-[800px] mx-auto px-6 py-12 md:py-16 flex flex-col items-center">
+        <!-- Dynamically populated by renderResults() -->
+      </section>
+
+    </main>
+
+
+    <!-- 3. FOOTER BAR (Same styled elements as the React site) -->
+    <footer id="footer" class="bg-[#F5F2EC] dark:bg-[#141412] border-t border-[#E8E4DC] dark:border-[#2E2E2C] py-16 md:py-20 text-left transition-colors-theme">
+      <div class="max-w-[1200px] mx-auto px-6">
+        
+        <!-- Three Column Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
+          
+          <!-- Left Column: Wordmark & Brand line -->
+          <div class="flex flex-col items-start" id="footer-branding">
+            <span class="font-serif font-bold text-xl text-[#1C1C1A] dark:text-[#F5F2EC]">
+              Stratapult
+            </span>
+            <p class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF] leading-relaxed mt-4 max-w-xs">
+              Building Operating Systems for Australian trade businesses. Not websites. Revenue engines.
+            </p>
+            <span class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF] mt-2 block">
+              Melbourne, VIC, Australia
+            </span>
+          </div>
+
+          <!-- Middle Column: Quick links -->
+          <div class="flex flex-col items-start" id="footer-links">
+            <h4 class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC] uppercase tracking-[0.08em] mb-4">
+              Quick Links
+            </h4>
+            <div class="flex flex-col gap-3">
+              <a href="/" class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors duration-200">
+                Our OS
+              </a>
+              <a href="https://flux-os-cyan.vercel.app" target="_blank" rel="noopener noreferrer" class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors duration-200">
+                FluxOS Live
+              </a>
+              <a href="/#how-it-works" class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors duration-200">
+                How It Works
+              </a>
+              <a href="/#compare" class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors duration-200">
+                Compare
+              </a>
+              <a href="/#pricing" class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF] hover:text-[#E8622A] transition-colors duration-200">
+                Pricing
+              </a>
+            </div>
+          </div>
+
+          <!-- Right Column: Contact details -->
+          <div class="flex flex-col items-start" id="footer-contact">
+            <h4 class="font-sans font-bold text-[13px] text-[#1C1C1A] dark:text-[#F5F2EC] uppercase tracking-[0.08em] mb-4">
+              Contact
+            </h4>
+            
+            <!-- Email contact row -->
+            <div class="flex items-center gap-2 mb-3">
+              <i data-lucide="mail" class="w-3.5 h-3.5 text-[#E8622A]"></i>
+              <a href="mailto:hello@stratapult.com.au" class="font-sans text-sm text-[#E8622A] hover:text-[#ff763d] font-medium transition-colors">
+                hello@stratapult.com.au
+              </a>
+            </div>
+
+            <!-- Location row -->
+            <div class="flex items-center gap-2">
+              <i data-lucide="map-pin" class="w-3.5 h-3.5 text-[#6B6B68] dark:text-[#9CA3AF]"></i>
+              <span class="font-sans text-sm text-[#6B6B68] dark:text-[#9CA3AF]">
+                Melbourne, VIC, Australia
+              </span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="border-t border-[#E8E4DC] dark:border-[#2E2E2C] pt-8 mt-12 text-center" id="footer-bottom">
+          <p class="font-sans text-xs sm:text-sm text-[#6B6B68] dark:text-[#9CA3AF]">
+            © 2026 Stratapult. All rights reserved.
+          </p>
+        </div>
+
+      </div>
+    </footer>
+
+    <!-- Main Logic Script (processed by Vite) -->
+    <script type="module" src="./audit.ts"></script>
+  </body>
+</html>
